@@ -62,6 +62,7 @@ export default {
           this.AudioPlayer = audio();
           this.defaultPre(Array.from(this.playList, (x) => x.path));
           this.AudioPlayer.setCurrentAudio(0);
+          console.log(1)
         } else {
           this.AudioPlayer.setCurrentAudio(index);
           this.AudioPlayer.play();
