@@ -98,7 +98,7 @@ export default {
         {
             id: 5,
             name: "album5",
-            img_path: "album-img.png",
+            img_path: "img100.jpg",
             artist: "MainGroup5",
             description: "Description 5",
             playlist: [

@@ -76,7 +76,8 @@ export default {
   grid-row-gap: 10px;
 }
 .img {
-  height: 200px;
+  width: 220px;
+  height: 220px;
   grid-area: img;
 }
 .meta {

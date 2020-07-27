@@ -57,7 +57,8 @@ a {
 }
 
 .album img {
-  width: 150px;
+  width: 120px;
+  height: 120px;
   margin-right: 20px;
 }
 
