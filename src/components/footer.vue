@@ -34,10 +34,8 @@
     </div>
     <div class="footer-right">
       <div class="lyrics"></div>
-      <div class="listBtn">
-        <router-link :to="{name:'playlist'}">
+      <div class="listBtn" style="cursor:pointer;" @click="$route.name != 'playlist' ? $router.push({name:'playlist'}):$router.go(-1)">
           <img :src="require('@/assets/img/playlist.png')" alt />
-        </router-link>
       </div>
       <div class="sound">
         <img :src="require('@/assets/img/sound.png')" alt />

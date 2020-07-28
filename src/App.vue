@@ -6,7 +6,7 @@
       </div>
       <div class="center">
         <transition name="fade" mode="out-in">
-          <router-view @albumList="albumList" />
+          <router-view @albumList="albumList" :album="album" :audio="AudioPlayer" :playList="playList"/>
         </transition>
       </div>
       <div class="player">
@@ -49,7 +49,7 @@ export default {
       playList: null,
       songName: "",
       songArtist: "",
-      alubm: "",
+      album: null,
     };
   },
   methods: {
@@ -62,7 +62,6 @@ export default {
           this.AudioPlayer = audio();
           this.defaultPre(Array.from(this.playList, (x) => x.path));
           this.AudioPlayer.setCurrentAudio(0);
-          console.log(1)
         } else {
           this.AudioPlayer.setCurrentAudio(index);
           this.AudioPlayer.play();
@@ -138,12 +137,14 @@ export default {
         this.AudioPlayer.stop();
         this.AudioPlayer = audio();
         localStorage.clear();
-        this.defaultPre(Array.from(this.playList, (x) => x.path));
+        this.defaultPre(Array.from(album.playlist, (x) => x.path));
         this.AudioPlayer.play();
 
         localStorage.setItem("list", JSON.stringify(album.playlist));
         localStorage.setItem("album", JSON.stringify(album));
         localStorage.setItem("playing", true);
+
+        this.$router.push({name:"playlist"});
       }
     },
   },
@@ -189,6 +190,7 @@ export default {
 <style>
 * {
   font-family: "微軟正黑體";
+  user-select: none;
 }
 #app {
   -webkit-font-smoothing: antialiased;
@@ -240,7 +242,7 @@ body {
   transition: all 0.1s;
 }
 
-button {
+button,input {
   outline: none;
 }
 </style>
