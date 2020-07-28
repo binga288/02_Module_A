@@ -168,7 +168,7 @@ export default {
     if (localStorage.getItem("playing")) {
       this.soundBar.style.width = `${localStorage.getItem(
         "sound"
-      )*100}`;
+      )*100}%`;
     } else {
       this.soundBar.style.width = "100%";
       this.AudioPlayer.chaSound(1);

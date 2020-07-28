@@ -4,7 +4,7 @@ export default {
             name: "album1",
             img_path: "album-img.png",
             artist: "MainGroup1",
-            description: "Description 1",
+            description: "Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1",
             playlist: [
                 {
                     name: "Music1",

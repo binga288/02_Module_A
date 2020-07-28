@@ -1,33 +1,33 @@
 <template>
   <div>
-    <div class="header">
+    <div class="header text-hidden overflow-hidden">
       <div class="album-main-des">
-        <div class="meta">
-          <h1 class="title">{{ album.name }}</h1>
-          <div class="artist">{{ album.artist }}</div>
-          <div class="stats">{{ album.playlist.length }}首歌曲 | X小時XX分鐘</div>
+        <div class="meta text-break text-white-50">
+          <h1 class="text-white m-0">{{ album.name }}</h1>
+          <div >{{ album.artist }}</div>
+          <div >{{ album.playlist.length }}首歌曲 | X小時XX分鐘</div>
           <br />
-          <div class="des">{{ album.description }}</div>
+          <div >{{ album.description }}</div>
         </div>
         <img class="img" :src="require(`@/assets/img/${album.img_path}`)" :alt="album.name" />
         <div class="action">
           <button type="button" @click="albumList(album)" class="btn btn-primary btn-lg btn-success">
-            <img :src="require('@/assets/img/play.png')" alt />
+            <img :src="require('@/assets/img/play.png')" style="width:20px;" alt />
           </button>
         </div>
       </div>
     </div>
-    <div class="song-list">
+    <div class="song-list text-white d-flex flex-column">
       <div class="song-bg" v-for="(song, index) in album.playlist" :key="song.name">
-        <div class="song">
-          <div class="song-left">
+        <div class="song my-3 mx-5">
+          <div>
             <span>{{ index+1 }}</span>
           </div>
-          <div class="song-center">
+          <div>
             <div>{{ song.name }}</div>
-            <div style="color:gray;font-size:14px;">{{ album.artist }}</div>
+            <div class="text-white-50" style="font-size:14px;">{{ album.artist }}</div>
           </div>
-          <div class="song-right" style="color:gray;text-align:right;">
+          <div class="text-white-50 text-right">
             <span>00:00</span>
           </div>
         </div>
@@ -61,9 +61,7 @@ export default {
 
 <style scoped>
 .header {
-  overflow: hidden;
   background: #1d1d1d;
-  padding: 20px 0 0;
 }
 .album-main-des {
   display: grid;
@@ -84,33 +82,13 @@ export default {
   grid-area: meta;
   width: 600px;
 }
-.title {
-  color: white;
-  margin: 0;
-}
-.artist,
-.des,
-.stats {
-  word-break: break-all;
-  color: gray;
-}
 .action {
   grid-area: action;
 }
-.addBtn {
-  width: 50px;
-  height: 50px;
-  background-color: green;
-  border-radius: 500px;
-}
 .song-list {
   width: 100%;
-  color: white;
-  display: flex;
-  flex-direction: column;
 }
 .song {
-  margin: 10px 150px;
   display: grid;
   grid-template-columns: 30px 1fr 1fr;
 }
