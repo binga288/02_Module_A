@@ -1,12 +1,12 @@
 <template>
   <div class="left_In">
-    <router-link :to="{name:'home'}">
+    <router-link :to="{name:'home'}" class="text-decoration-none">
       <div class="option">
         <img :src="require('@/assets/img/Home-img.png')" alt="Home" />
         首頁
       </div>
     </router-link>
-    <router-link :to="{name:'search'}">
+    <router-link :to="{name:'search'}" class="text-decoration-none">
       <div class="option">
         <img :src="require('@/assets/img/Search-img.png')" alt="Home" />
         搜尋

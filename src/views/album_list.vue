@@ -11,7 +11,7 @@
         </div>
         <img class="img" :src="require(`@/assets/img/${album.img_path}`)" :alt="album.name" />
         <div class="action">
-          <button type="button" @click="albumList(album)" class="addBtn">
+          <button type="button" @click="albumList(album)" class="btn btn-primary btn-lg btn-success">
             <img :src="require('@/assets/img/play.png')" alt />
           </button>
         </div>
@@ -102,9 +102,6 @@ export default {
   height: 50px;
   background-color: green;
   border-radius: 500px;
-}
-.addBtn img {
-  height: 20px;
 }
 .song-list {
   width: 100%;

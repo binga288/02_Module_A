@@ -24,27 +24,25 @@
         <img v-else style="opacity: 0.5;" :src="require('@/assets/img/next.png')" alt />
       </div>
       <div class="play-bar-contain">
-        <div class="play-bar" style="cursor:pointer;" @click="scheduleCha" data-child="schedule">
-          <div class="bar-body">
-            <div class="bar-view" id="schedule"></div>
-          </div>
+        <div class="progress" style="height: 3px;width: 100%;cursor:pointer;" @click="scheduleCha">
+          <div class="progress-bar bg-success" style="pointer-events:none;" id="schedule"></div>
         </div>
         <div class="time">{{ currentTime }}/{{ durationTime }}</div>
       </div>
     </div>
     <div class="footer-right">
       <div class="lyrics"></div>
-      <div class="listBtn" style="cursor:pointer;" @click="$route.name != 'playlist' ? $router.push({name:'playlist'}):$router.go(-1)">
-          <img :src="require('@/assets/img/playlist.png')" alt />
+      <div
+        class="listBtn"
+        style="cursor:pointer;"
+        @click="$route.name != 'playlist' ? $router.push({name:'playlist'}):$router.go(-1)"
+      >
+        <img :src="require('@/assets/img/playlist.png')" alt />
       </div>
       <div class="sound">
         <img :src="require('@/assets/img/sound.png')" alt />
-        <div class="play-bar-contain">
-          <div class="play-bar" @click="soundCha" data-child="sound" style="cursor:pointer;">
-            <div class="bar-body">
-              <div class="bar-view" id="sound"></div>
-            </div>
-          </div>
+        <div class="progress" style="width: 100%;height: 3px;cursor:pointer;" @click="soundCha">
+          <div class="progress-bar bg-success" id="sound" style="pointer-events:none;"></div>
         </div>
       </div>
     </div>
@@ -75,7 +73,7 @@ export default {
     },
     album: {
       type: Object,
-    }
+    },
   },
   computed: {
     nextVerify() {
@@ -152,30 +150,6 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-.play-bar {
-  position: relative;
-  width: 100%;
-  height: 10px;
-  overflow: hidden;
-}
-.bar-body {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: gray;
-  border-radius: 2px;
-  height: 4px;
-  width: 100%;
-  pointer-events: none;
-}
-.bar-view {
-  width: 100%;
-  background-color: green;
-  height: 4px;
-  transform-origin: left;
-  transform: scaleX(0);
-  pointer-events: none;
-}
 .time {
   text-align: center;
   color: gray;
@@ -199,6 +173,7 @@ export default {
 .sound {
   width: 150px;
   display: flex;
+  align-items: center;
 }
 .sound img {
   height: 25px;

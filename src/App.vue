@@ -95,7 +95,7 @@ export default {
         this.currentTime = this.AudioPlayer.formatTime(current);
         this.durationTime = this.AudioPlayer.formatTime(duration);
 
-        this.scheduleBar.style.transform = `scaleX(${current / duration})`;
+        this.scheduleBar.style.width = `${current / duration * 100}%`;
         localStorage.setItem("currentTime", current);
         localStorage.setItem("durationTime", duration);
       });
@@ -114,13 +114,14 @@ export default {
       }
     },
     soundCha(e) {
-      const schedule = e.offsetX / e.target.clientWidth;
-      this.soundBar.style.transform = `scaleX(${schedule})`;
-      this.AudioPlayer.chaSound(schedule);
+      const sound = e.offsetX / e.target.clientWidth;
+      this.soundBar.style.width = `${sound*100}%`;
+      this.AudioPlayer.chaSound(sound);
     },
     scheduleCha(e) {
       const schedule = e.offsetX / e.target.clientWidth;
-      this.scheduleBar.style.transform = `scaleX(${schedule})`;
+      
+      this.scheduleBar.style.width = `${schedule*100}%`;
       this.AudioPlayer.setCurrentTime(
         this.AudioPlayer.getDuration() * schedule
       );
@@ -165,11 +166,11 @@ export default {
     this.soundBar = document.getElementById("sound");
     this.scheduleBar = document.getElementById("schedule");
     if (localStorage.getItem("playing")) {
-      this.soundBar.style.transform = `scaleX(${localStorage.getItem(
+      this.soundBar.style.width = `${localStorage.getItem(
         "sound"
-      )})`;
+      )*100}`;
     } else {
-      this.soundBar.style.transform = `scaleX(1)`;
+      this.soundBar.style.width = "100%";
       this.AudioPlayer.chaSound(1);
     }
 
@@ -181,7 +182,7 @@ export default {
       this.currentTime = this.AudioPlayer.formatTime(current);
       this.durationTime = this.AudioPlayer.formatTime(duration);
 
-      this.scheduleBar.style.transform = `scaleX(${current / duration})`;
+      this.scheduleBar.style.width = `${current / duration * 100}%`;
     }
   },
 };
