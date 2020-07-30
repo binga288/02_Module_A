@@ -1,14 +1,14 @@
 <template>
   <div class="footer-content px-4">
     <div class="footer-left d-flex align-items-center" v-if="playIndex >= 0 && playList">
-      <img :src="require(`@/assets/img/${albumImg}`)" />
+      <img :src="require(`@/assets/${albumImg}`)" />
       <div class="song-title ml-3">
         <div class="text-white">{{ songName }}</div>
         <div style="color:gray;font-size:15px;">{{ songArtist }}</div>
       </div>
     </div>
     <div class="footer-center d-flex justify-content-center align-items-center flex-column">
-      <div class="center-img d-flex justify-content-between mb-1">
+      <div class="center-img d-flex justify-content-between mb-2">
         <img v-if="prevVerify" @click="setSong(-1)" :src="require('@/assets/img/back.png')" alt />
         <img v-else style="opacity: 0.5;" :src="require('@/assets/img/back.png')" alt />
 
@@ -27,16 +27,12 @@
         <div class="progress" style="height: 5px;width: 100%;cursor:pointer;" @click="scheduleCha">
           <div class="progress-bar bg-success" style="pointer-events:none;" id="schedule"></div>
         </div>
-        <div class="text-white-50 ml-2" >{{ currentTime }}/{{ durationTime }}</div>
+        <div class="text-white-50 ml-2">{{ currentTime }}/{{ durationTime }}</div>
       </div>
     </div>
     <div class="footer-right d-flex justify-content-end align-items-center">
       <div class="lyrics"></div>
-      <div
-        class="listBtn"
-        style="cursor:pointer;"
-        @click="$route.name != 'playlist' ? $router.push({name:'playlist'}):$router.go(-1)"
-      >
+      <div @click="$emit('songListShow')" class="listBtn" style="cursor:pointer;">
         <img :src="require('@/assets/img/playlist.png')" alt />
       </div>
       <div class="sound d-flex align-items-center">
@@ -122,7 +118,9 @@ export default {
   grid-area: footer-left;
 }
 .footer-left img {
-  height: 60px;
+  height: 80px;
+  width: 80px;
+  object-fit: cover;
 }
 .footer-center {
   grid-area: footer-center;

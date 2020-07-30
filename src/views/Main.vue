@@ -1,10 +1,10 @@
 <template>
   <div class="contain">
     <section class="albums">
-      <div v-for="album in albums" :key="album.name">
-        <router-link :to="{name:'album',params:{albumName:album.name}}" class="text-decoration-none">
+      <div v-for="album in all_album" :key="album.name">
+        <router-link :to="{name:'album',params:{albumId:album.id}}" class="text-decoration-none">
           <div class="d-flex album">
-            <img class="mr-3" :src="require(`@/assets/img/${album.img_path}`)" :alt="album.name" />
+            <img class="mr-3" :src="require(`@/assets/${album.img_path}`)" :alt="album.name" />
             <div class="d-flex flex-column col-9">
               <h3 class="text-white">{{ album.name }}</h3>
               <!-- <div class="text-body">{{ album.artist }}</div> -->
@@ -19,14 +19,13 @@
 </template>
 
 <script>
-import Album from "@/albums";
-
 export default {
-  data() {
-    return {
-      albums: Album.albums,
-    };
-  },
+  props: {
+    all_album: {
+      type: Array,
+      required: true,
+    },
+  }
 };
 </script>
 
@@ -49,5 +48,6 @@ export default {
 .album img {
   width: 120px;
   height: 120px;
+  object-fit: cover;
 }
 </style>

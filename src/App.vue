@@ -2,11 +2,18 @@
   <div id="app">
     <div class="main">
       <div class="left">
-        <Controll />
+        <Controll :playStatus="AudioPlayer.playStatus" />
       </div>
       <div class="center">
+        <songList
+          v-if="listShow"
+          class="songList"
+          :album="album"
+          :audio="AudioPlayer"
+          :playList="playList"
+        />
         <transition name="fade" mode="out-in">
-          <router-view @albumList="albumList" :album="album" :audio="AudioPlayer" :playList="playList"/>
+          <router-view @albumList="albumList" />
         </transition>
       </div>
       <div class="player">
@@ -15,6 +22,7 @@
           @soundCha="soundCha"
           @scheduleCha="scheduleCha"
           @setSong="setSong"
+          @songListShow="songListShow"
           :currentTime="currentTime"
           :durationTime="durationTime"
           :playStatus="AudioPlayer.playStatus"
@@ -31,6 +39,7 @@
 <script>
 import Controll from "@/components/controll.vue";
 import Footer from "@/components/footer.vue";
+import songList from "@/components/playlist.vue";
 import audio from "@/audio.js";
 
 export default {
@@ -38,6 +47,7 @@ export default {
   components: {
     Controll,
     Footer,
+    songList,
   },
   data() {
     return {
@@ -50,9 +60,13 @@ export default {
       songName: "",
       songArtist: "",
       album: null,
+      listShow: false,
     };
   },
   methods: {
+    songListShow() {
+      this.listShow = !this.listShow;
+    },
     defaultEvent() {
       this.AudioPlayer.on("ended", () => {
         let index = this.AudioPlayer.playIndex + 1;
@@ -70,12 +84,22 @@ export default {
 
       this.AudioPlayer.on("canplaythrough", () => {
         let array = this.playList[this.AudioPlayer.playIndex];
-        
         navigator.mediaSession.metadata = new window.MediaMetadata({
           title: array.name,
           album: this.album.name,
           artist: array.artist,
-          artwork: [{ src: require(`@/assets/img/${this.album.img_path}`) }],
+          artwork: [
+            {
+              src: require(`@/assets/${this.album.img_path}`),
+              sizes: "320x180",
+            },
+          ],
+        });
+        navigator.mediaSession.setActionHandler("play", () => {
+          this.AudioPlayer.play();
+        });
+        navigator.mediaSession.setActionHandler("pause", () => {
+          this.AudioPlayer.stop();
         });
         navigator.mediaSession.setActionHandler("previoustrack", () => {
           if (this.AudioPlayer.playIndex - 1 >= 0) {
@@ -95,7 +119,7 @@ export default {
         this.currentTime = this.AudioPlayer.formatTime(current);
         this.durationTime = this.AudioPlayer.formatTime(duration);
 
-        this.scheduleBar.style.width = `${current / duration * 100}%`;
+        this.scheduleBar.style.width = `${(current / duration) * 100}%`;
         localStorage.setItem("currentTime", current);
         localStorage.setItem("durationTime", duration);
       });
@@ -115,13 +139,13 @@ export default {
     },
     soundCha(e) {
       const sound = e.offsetX / e.target.clientWidth;
-      this.soundBar.style.width = `${sound*100}%`;
+      this.soundBar.style.width = `${sound * 100}%`;
       this.AudioPlayer.chaSound(sound);
     },
     scheduleCha(e) {
       const schedule = e.offsetX / e.target.clientWidth;
-      
-      this.scheduleBar.style.width = `${schedule*100}%`;
+
+      this.scheduleBar.style.width = `${schedule * 100}%`;
       this.AudioPlayer.setCurrentTime(
         this.AudioPlayer.getDuration() * schedule
       );
@@ -132,20 +156,21 @@ export default {
       this.AudioPlayer.play();
     },
     albumList(album) {
+      
       if (window.confirm("是否要取代目前播放清單")) {
-        this.playList = album.playlist;
+        this.playList = album.songlist;
         this.album = album;
         this.AudioPlayer.stop();
         this.AudioPlayer = audio();
         localStorage.clear();
-        this.defaultPre(Array.from(album.playlist, (x) => x.path));
+        this.defaultPre(Array.from(album.songlist, (x) => x.song_path));
         this.AudioPlayer.play();
 
-        localStorage.setItem("list", JSON.stringify(album.playlist));
+        localStorage.setItem("list", JSON.stringify(album.songlist));
         localStorage.setItem("album", JSON.stringify(album));
         localStorage.setItem("playing", true);
 
-        this.$router.push({name:"playlist"});
+        this.listShow = true;
       }
     },
   },
@@ -153,7 +178,7 @@ export default {
     if (localStorage.getItem("playing")) {
       this.playList = JSON.parse(localStorage.getItem("list"));
       this.album = JSON.parse(localStorage.getItem("album"));
-      this.defaultPre(Array.from(this.playList, (x) => x.path));
+      this.defaultPre(Array.from(this.playList, (x) => x.song_path));
     }
   },
   mounted() {
@@ -165,10 +190,9 @@ export default {
 
     this.soundBar = document.getElementById("sound");
     this.scheduleBar = document.getElementById("schedule");
-    if (localStorage.getItem("playing")) {
-      this.soundBar.style.width = `${localStorage.getItem(
-        "sound"
-      )*100}%`;
+    if (localStorage.getItem("sound")) {
+      this.soundBar.style.width = `${localStorage.getItem("sound") * 100}%`;
+      this.AudioPlayer.chaSound(localStorage.getItem("sound"));
     } else {
       this.soundBar.style.width = "100%";
       this.AudioPlayer.chaSound(1);
@@ -182,7 +206,7 @@ export default {
       this.currentTime = this.AudioPlayer.formatTime(current);
       this.durationTime = this.AudioPlayer.formatTime(duration);
 
-      this.scheduleBar.style.width = `${current / duration * 100}%`;
+      this.scheduleBar.style.width = `${(current / duration) * 100}%`;
     }
   },
 };
@@ -206,7 +230,7 @@ body {
 
 .main {
   display: grid;
-  grid-template-columns: 10vw 70vw 20vw;
+  grid-template-columns: 20% 80%;
   grid-template-rows: 90vh 10vh;
   grid-template-areas:
     "left center center"
@@ -215,7 +239,7 @@ body {
 
 .left {
   position: fixed;
-  width: 10%;
+  width: 20%;
   height: 100%;
   background: black;
   grid-area: left;
@@ -243,7 +267,13 @@ body {
   transition: all 0.1s;
 }
 
-button,input {
+button,
+input {
   outline: none;
+}
+
+.songList {
+  position: fixed;
+  right: 0;
 }
 </style>

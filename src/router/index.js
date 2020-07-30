@@ -4,7 +4,7 @@ import VueRouter from "vue-router";
 import main from "@/views/Main.vue"
 import search from "@/views/SearchView.vue"
 import album_list from "@/views/album_list.vue"
-import playlist from "@/views/playlist.vue"
+
 
 Vue.use(VueRouter);
 
@@ -14,7 +14,18 @@ export default new VueRouter({
         path: "/",
         name: "home",
         component: main,
-        props: true
+        props: true,
+        beforeEnter(to, from, next) {
+            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+                method: "GET",
+            })
+                .then(($res) => $res.json())
+                .then(($res) => {
+                    to.params.all_album = $res;
+                    next()
+                });
+
+        }
     },
     {
         path: "/search",
@@ -23,16 +34,21 @@ export default new VueRouter({
         props: { "default": "test" }
     },
     {
-        path: "/album/:albumName",
+        path: "/album/:albumId",
         name: "album",
         props: true,
-        component: album_list
-    },
-    {
-        path: "/playlist",
-        name: "playlist",
-        props: true,
-        component: playlist
+        component: album_list,
+        beforeEnter(to, from, next) {
+            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+                method: "GET",
+            })
+                .then(($res) => $res.json())
+                .then(($res) => {
+                    to.params.album = $res.find(album => album.id == to.params.albumId);
+                    next()
+                });
+
+        }
     }
     ]
 })

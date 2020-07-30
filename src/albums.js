@@ -7,9 +7,9 @@ export default {
             description: "Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1Description 1",
             playlist: [
                 {
-                    name: "Music1",
-                    path: "Music1.mp3",
-                    artist: "artist1"
+                    name: "twenty one pilots Stressed Out [OFFICIAL VIDEO]",
+                    path: "twenty one pilots Stressed Out [OFFICIAL VIDEO].mp3",
+                    artist: "twenty one pilots"
                 },
                 {
                     name: "Music2",
