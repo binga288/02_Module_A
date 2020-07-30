@@ -1,12 +1,12 @@
 <template>
   <div class="contain">
     <section class="albums">
-      <div v-for="album in all_album" :key="album.name">
+      <div v-for="album in all_album" :key="album.title">
         <router-link :to="{name:'album',params:{albumId:album.id}}" class="text-decoration-none">
           <div class="d-flex album">
-            <img class="mr-3" :src="require(`@/assets/${album.img_path}`)" :alt="album.name" />
+            <img class="mr-3" :src="require(`@/assets/${album.img_path}`)" :alt="album.title" />
             <div class="d-flex flex-column col-9">
-              <h3 class="text-white">{{ album.name }}</h3>
+              <h3 class="text-white">{{ album.title }}</h3>
               <!-- <div class="text-body">{{ album.artist }}</div> -->
               <br />
               <div class="text-truncate text-white-50">{{ album.description }}</div>

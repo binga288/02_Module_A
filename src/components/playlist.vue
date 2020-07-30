@@ -4,17 +4,17 @@
       class="song-bg"
       v-for="(song, index) in playList"
       :class="{'song-now':index == audio.playIndex}"
-      :key="song.name"
+      :key="song.title"
     >
-      <div class="song" @click="songPlay(index)">
-        <div class="song-left">
+      <div class="song px-4 py-3" @click="songPlay(index)">
+        <div>
           <span>{{ index+1 }}</span>
         </div>
-        <div class="song-center">
-          <div>{{ song.name }}</div>
+        <div>
+          <div>{{ song.title }}</div>
           <div class="text-white-50" style="font-size:14px;">{{ album.artist }}</div>
         </div>
-        <div class="song-right text-white-50 text-right">
+        <div class="text-white-50 text-right">
           <span>00:00</span>&emsp;
         </div>
         <div v-if="index != audio.playIndex" class="song-remove text-right" @click.stop="songRemove(index)">X</div>
@@ -58,11 +58,10 @@ export default {
 <style scoped>
 .song-list {
   height: 90%;
-  width: 350px;
+  width: 450px;
   background: black;
   z-index: 10;
   overflow-y: scroll;
-  scroll-behavior: smooth;
 }
 .song-bg {
   width: 100%;
@@ -80,7 +79,6 @@ export default {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 .song {
-  margin: 15px 35px;
   display: grid;
   grid-template-columns: 30px 1fr 1fr 30px;
 }

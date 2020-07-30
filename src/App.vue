@@ -13,7 +13,7 @@
           :playList="playList"
         />
         <transition name="fade" mode="out-in">
-          <router-view @albumList="albumList" />
+          <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay"/>
         </transition>
       </div>
       <div class="player">
@@ -74,7 +74,7 @@ export default {
 
         if (index >= this.AudioPlayer.playlist.length) {
           this.AudioPlayer = audio();
-          this.defaultPre(Array.from(this.playList, (x) => x.path));
+          this.defaultPre(Array.from(this.playList, (x) => x.song_path));
           this.AudioPlayer.setCurrentAudio(0);
         } else {
           this.AudioPlayer.setCurrentAudio(index);
@@ -86,7 +86,7 @@ export default {
         let array = this.playList[this.AudioPlayer.playIndex];
         navigator.mediaSession.metadata = new window.MediaMetadata({
           title: array.name,
-          album: this.album.name,
+          album: this.album.title,
           artist: array.artist,
           artwork: [
             {
@@ -155,8 +155,30 @@ export default {
       this.AudioPlayer.setCurrentAudio(nextIndex);
       this.AudioPlayer.play();
     },
-    albumList(album) {
-      
+    join(song){
+      if(this.playList.find(e=>e.name == song.title)){
+        alert("歌曲已被加入");
+      }else{
+        this.playList.push(song);
+        this.AudioPlayer.playlist.push(song.song_path);
+        this.listShow = true;
+        localStorage.setItem("list", JSON.stringify(this.playList));
+      }
+    },
+    searchPlay(song){
+      if(this.playList.findIndex(e=>e.name == song.title) > -1){
+        this.AudioPlayer.setCurrentAudio(this.playList.findIndex(e=>e.name == song.title));
+        this.AudioPlayer.play();
+      }else{
+        this.playList.push(song);
+        let index = this.AudioPlayer.playlist.push(song.song_path);
+        this.listShow = true;
+        this.AudioPlayer.setCurrentAudio(index-1);
+        this.AudioPlayer.play();
+        localStorage.setItem("list", JSON.stringify(this.playList));
+      }
+    },
+    albumList(album) {      
       if (window.confirm("是否要取代目前播放清單")) {
         this.playList = album.songlist;
         this.album = album;
@@ -169,8 +191,6 @@ export default {
         localStorage.setItem("list", JSON.stringify(album.songlist));
         localStorage.setItem("album", JSON.stringify(album));
         localStorage.setItem("playing", true);
-
-        this.listShow = true;
       }
     },
   },

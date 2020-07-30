@@ -3,13 +3,13 @@
     <div class="header text-hidden overflow-hidden">
       <div class="album-main-des">
         <div class="meta text-break text-white-50">
-          <h1 class="text-white m-0">{{ album.name }}</h1>
+          <h1 class="text-white m-0">{{ album.title }}</h1>
           <div>{{ album.artist }}</div>
           <div>{{ album.songlist.length }}首歌曲 | X小時XX分鐘</div>
           <br />
           <div>{{ album.description }}</div>
         </div>
-        <img class="img" :src="require(`@/assets/${album.img_path}`)" :alt="album.name" />
+        <img class="img" :src="require(`@/assets/${album.img_path}`)" :alt="album.title" />
         <div class="action">
           <button
             type="button"
@@ -22,16 +22,19 @@
       </div>
     </div>
     <div class="song-list text-white d-flex flex-column">
-      <div class="song-bg" v-for="(song, index) in album.songlist" :key="song.name">
+      <div class="song-bg" v-for="(song, index) in album.songlist" :key="song.title">
         <div class="song my-3 mx-5">
           <div>
             <span>{{ index+1 }}</span>
           </div>
           <div>
-            <div>{{ song.name }}</div>
-            <div class="text-white-50" style="font-size:14px;">{{ album.artist }}</div>
+            <div>{{ song.title }}</div>
+            <div class="text-white-50" style="font-size:14px;">
+              <span>{{ album.artist }}</span>
+              <span class="ml-3">{{ song.composer }}</span>
+            </div>
           </div>
-          <div class="text-white-50 text-right">
+          <div class="text-white-50 d-flex align-items-center justify-content-end">
             <span>00:00</span>
           </div>
         </div>
@@ -44,19 +47,19 @@
 export default {
   props: {
     albumId: {
-      type: String,
+      type: Number,
       required: true,
     },
-    album:{
-      type:Object,
-      required:true
-    }
+    album: {
+      type: Object,
+      required: true,
+    },
   },
   methods: {
-    albumList: function (album) {      
+    albumList: function (album) {
       this.$emit("albumList", album);
     },
-  }
+  },
 };
 </script>
 

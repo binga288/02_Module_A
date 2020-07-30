@@ -3,8 +3,9 @@
     <div class="footer-left d-flex align-items-center" v-if="playIndex >= 0 && playList">
       <img :src="require(`@/assets/${albumImg}`)" />
       <div class="song-title ml-3">
-        <div class="text-white">{{ songName }}</div>
-        <div style="color:gray;font-size:15px;">{{ songArtist }}</div>
+        <span class="text-white">{{ songName }}</span>
+        <span class="text-white-50 ml-1" style="font-size:15px;">{{ songArtist }}</span>
+        <div class="text-white-50">lyrics</div>
       </div>
     </div>
     <div class="footer-center d-flex justify-content-center align-items-center flex-column">

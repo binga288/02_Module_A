@@ -31,7 +31,18 @@ export default new VueRouter({
         path: "/search",
         name: "search",
         component: search,
-        props: { "default": "test" }
+        props: true,
+        beforeEnter(to, from, next) {
+            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+                method: "GET",
+            })
+                .then(($res) => $res.json())
+                .then(($res) => {
+                    to.params.all_album = $res;
+                    next()
+                });
+
+        }
     },
     {
         path: "/album/:albumId",
