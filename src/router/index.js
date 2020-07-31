@@ -16,7 +16,7 @@ export default new VueRouter({
         component: main,
         props: true,
         beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
                 method: "GET",
             })
                 .then(($res) => $res.json())
@@ -33,7 +33,7 @@ export default new VueRouter({
         component: search,
         props: true,
         beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
                 method: "GET",
             })
                 .then(($res) => $res.json())
@@ -50,7 +50,7 @@ export default new VueRouter({
         props: true,
         component: album_list,
         beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/XX_Module_A_API/api/albums", {
+            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
                 method: "GET",
             })
                 .then(($res) => $res.json())
