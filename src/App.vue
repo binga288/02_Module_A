@@ -5,15 +5,9 @@
         <Controll :playStatus="AudioPlayer.playStatus" />
       </div>
       <div class="center">
-        <songList
-          v-if="listShow"
-          class="songList"
-          :album="album"
-          :audio="AudioPlayer"
-          :playList="playList"
-        />
+        <songList v-if="listShow" class="songList" :audio="AudioPlayer" :playList="playList" />
         <transition name="fade" mode="out-in">
-          <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay"/>
+          <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay" />
         </transition>
       </div>
       <div class="player">
@@ -21,15 +15,12 @@
           @playBtn="playBtn"
           @soundCha="soundCha"
           @scheduleCha="scheduleCha"
-          @setSong="setSong"
+          @setSong="setNextSong"
           @songListShow="songListShow"
           :currentTime="currentTime"
           :durationTime="durationTime"
-          :playStatus="AudioPlayer.playStatus"
-          :playIndex="AudioPlayer.playIndex"
-          :listLength="AudioPlayer.playlist.length"
+          :audio="AudioPlayer"
           :playList="playList"
-          :album="album"
         />
       </div>
     </div>
@@ -56,10 +47,9 @@ export default {
       durationTime: "00:00",
       soundBar: null,
       scheduleBar: null,
-      playList: null,
+      playList: [],
       songName: "",
       songArtist: "",
-      album: null,
       listShow: false,
     };
   },
@@ -72,9 +62,9 @@ export default {
         let index = this.AudioPlayer.playIndex + 1;
         this.AudioPlayer.stop();
 
-        if (index >= this.AudioPlayer.playlist.length) {
+        if (index >= this.playList.length) {
           this.AudioPlayer = audio();
-          this.defaultPre(Array.from(this.playList, (x) => x.song_path));
+          this.defaultPre(this.playList);
           this.AudioPlayer.setCurrentAudio(0);
         } else {
           this.AudioPlayer.setCurrentAudio(index);
@@ -83,14 +73,14 @@ export default {
       });
 
       this.AudioPlayer.on("canplaythrough", () => {
-        let array = this.playList[this.AudioPlayer.playIndex];
+        let song = this.playList[this.AudioPlayer.playIndex];
         navigator.mediaSession.metadata = new window.MediaMetadata({
-          title: array.name,
-          album: this.album.title,
-          artist: array.artist,
+          title: song.name,
+          album: song.album_name,
+          artist: song.artist,
           artwork: [
             {
-              src: require(`@/assets/${this.album.img_path}`),
+              src: require(`@/assets/${song.img_path}`),
               sizes: "320x180",
             },
           ],
@@ -102,14 +92,11 @@ export default {
           this.AudioPlayer.stop();
         });
         navigator.mediaSession.setActionHandler("previoustrack", () => {
-          if (this.AudioPlayer.playIndex - 1 >= 0) {
-            this.setSong(-1);
-          }
+          if (this.AudioPlayer.playIndex - 1 >= 0) this.setSong(-1);
         });
         navigator.mediaSession.setActionHandler("nexttrack", () => {
-          if (this.AudioPlayer.playIndex + 1 < this.playList.length) {
+          if (this.AudioPlayer.playIndex + 1 < this.playList.length)
             this.setSong(1);
-          }
         });
       });
 
@@ -124,14 +111,18 @@ export default {
         localStorage.setItem("durationTime", duration);
       });
     },
-    defaultPre(array) {
+    defaultPre(obj) {
       let index = localStorage.getItem("playIndex") | 0;
-      this.AudioPlayer.setSonglist(array);
+      this.AudioPlayer.setSonglist(obj);
       this.AudioPlayer.setCurrentAudio(index);
       this.defaultEvent();
     },
     playBtn() {
-      if (!this.AudioPlayer.playStatus && this.playList) {
+      if (
+        !this.AudioPlayer.playStatus &&
+        this.playList &&
+        this.AudioPlayer.playing
+      ) {
         this.AudioPlayer.play();
       } else {
         this.AudioPlayer.stop();
@@ -150,56 +141,65 @@ export default {
         this.AudioPlayer.getDuration() * schedule
       );
     },
-    setSong(index) {
+    setNextSong(index) {
       let nextIndex = this.AudioPlayer.playIndex + index;
       this.AudioPlayer.setCurrentAudio(nextIndex);
       this.AudioPlayer.play();
     },
-    join(song){
-      if(this.playList.find(e=>e.name == song.title)){
+    join(song) {
+      if (this.playList.some((e) => e.title == song.title)) {
         alert("歌曲已被加入");
-      }else{
+      } else {
         this.playList.push(song);
-        this.AudioPlayer.playlist.push(song.song_path);
+        this.AudioPlayer.playlist = this.playList;
         this.listShow = true;
-        localStorage.setItem("list", JSON.stringify(this.playList));
+        if (!this.AudioPlayer.playing) {
+          this.PrePlay(this.playList, false);
+        } else {
+          localStorage.setItem("list", JSON.stringify(this.playList));
+        }
       }
     },
-    searchPlay(song){
-      if(this.playList.findIndex(e=>e.name == song.title) > -1){
-        this.AudioPlayer.setCurrentAudio(this.playList.findIndex(e=>e.name == song.title));
+    searchPlay(song) {
+      if (this.playList.findIndex((e) => e.title == song.title) > -1) {
+        this.AudioPlayer.setCurrentAudio(
+          this.playList.findIndex((e) => e.title == song.title)
+        );
         this.AudioPlayer.play();
-      }else{
+      } else {
         this.playList.push(song);
-        let index = this.AudioPlayer.playlist.push(song.song_path);
+        this.AudioPlayer.playlist = this.playList;
         this.listShow = true;
-        this.AudioPlayer.setCurrentAudio(index-1);
-        this.AudioPlayer.play();
-        localStorage.setItem("list", JSON.stringify(this.playList));
+        if (!this.AudioPlayer.playing) {
+          this.PrePlay(this.playList, false);
+        } else {
+          this.AudioPlayer.setCurrentAudio(this.playList.length - 1);
+          this.AudioPlayer.play();
+          localStorage.setItem("list", JSON.stringify(this.playList));
+        }
       }
     },
-    albumList(album) {      
+    albumList(album) {
       if (window.confirm("是否要取代目前播放清單")) {
         this.playList = album.songlist;
-        this.album = album;
         this.AudioPlayer.stop();
         this.AudioPlayer = audio();
-        localStorage.clear();
-        this.defaultPre(Array.from(album.songlist, (x) => x.song_path));
-        this.AudioPlayer.play();
-
-        localStorage.setItem("list", JSON.stringify(album.songlist));
-        localStorage.setItem("album", JSON.stringify(album));
-        localStorage.setItem("playing", true);
+        this.PrePlay(album.songlist);
       }
+    },
+    PrePlay(list) {
+      localStorage.clear();
+      this.defaultPre(list);
+      this.AudioPlayer.play();
+
+      localStorage.setItem("list", JSON.stringify(list));
+      localStorage.setItem("playing", true);
     },
   },
   created() {
-    if (localStorage.getItem("playing")) {
-      this.playList = JSON.parse(localStorage.getItem("list"));
-      this.album = JSON.parse(localStorage.getItem("album"));
-      this.defaultPre(Array.from(this.playList, (x) => x.song_path));
-    }
+    let list = JSON.parse(localStorage.getItem("list"));
+    this.playList = list ? list : [];
+    list ? this.defaultPre(this.playList) : "";
   },
   mounted() {
     document.addEventListener("keypress", (e) => {
@@ -219,8 +219,8 @@ export default {
     }
 
     if (localStorage.getItem("playing")) {
-      let current = localStorage.getItem("currentTime");
-      let duration = localStorage.getItem("durationTime");
+      const current = localStorage.getItem("currentTime");
+      const duration = localStorage.getItem("durationTime");
 
       this.AudioPlayer.setCurrentTime(current);
       this.currentTime = this.AudioPlayer.formatTime(current);

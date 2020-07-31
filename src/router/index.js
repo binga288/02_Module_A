@@ -10,56 +10,71 @@ Vue.use(VueRouter);
 
 export default new VueRouter({
     mode: "history",
-    routes: [{
-        path: "/",
-        name: "home",
-        component: main,
-        props: true,
-        beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
-                method: "GET",
-            })
-                .then(($res) => $res.json())
-                .then(($res) => {
-                    to.params.all_album = $res;
-                    next()
-                });
+    routes: [
+        {
+            path: "/",
+            name: "home",
+            component: main,
+            props: true,
+            beforeEnter(to, from, next) {
+                fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
+                    method: "GET",
+                })
+                    .then(($res) => $res.json())
+                    .then(($res) => {
+                        $res.forEach(album => {
+                            album.songlist.forEach(song => song["album_name"] = album.title);
+                            album.songlist.forEach(song => song["img_path"] = album.img_path);
+                        });
+                        to.params.all_album = $res;
+                        next()
+                    });
 
-        }
-    },
-    {
-        path: "/search",
-        name: "search",
-        component: search,
-        props: true,
-        beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
-                method: "GET",
-            })
-                .then(($res) => $res.json())
-                .then(($res) => {
-                    to.params.all_album = $res;
-                    next()
-                });
+            }
+        },
+        {
+            path: "/search",
+            name: "search",
+            component: search,
+            props: true,
+            beforeEnter(to, from, next) {
+                fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
+                    method: "GET",
+                })
+                    .then(($res) => $res.json())
+                    .then(($res) => {
+                        $res.forEach(album => {
+                            album.songlist.forEach(song => song["album_name"] = album.title);
+                            album.songlist.forEach(song => song["img_path"] = album.img_path);
+                        });
+                        to.params.all_album = $res;
+                        next()
+                    });
 
-        }
-    },
-    {
-        path: "/album/:albumId",
-        name: "album",
-        props: true,
-        component: album_list,
-        beforeEnter(to, from, next) {
-            fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
-                method: "GET",
-            })
-                .then(($res) => $res.json())
-                .then(($res) => {
-                    to.params.album = $res.find(album => album.id == to.params.albumId);
-                    next()
-                });
+            }
+        },
+        {
+            path: "/album/:albumId",
+            name: "album",
+            props: true,
+            component: album_list,
+            beforeEnter(to, from, next) {
+                fetch("http://127.0.0.1/00_Module_A_API/api/albums", {
+                    method: "GET",
+                })
+                    .then(($res) => $res.json())
+                    .then(($res) => {
+                        $res.forEach(album => {
+                            album.songlist.forEach(song => song["album_name"] = album.title);
+                            album.songlist.forEach(song => song["img_path"] = album.img_path);
+                        });
+                        to.params.albumId *= 1;
+                        to.params.album = $res.find(album => album.id == to.params.albumId);
+                        next()
+                    });
 
+            }
         }
-    }
     ]
 })
+

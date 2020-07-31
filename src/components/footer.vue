@@ -1,7 +1,7 @@
 <template>
   <div class="footer-content px-4">
-    <div class="footer-left d-flex align-items-center" v-if="playIndex >= 0 && playList">
-      <img :src="require(`@/assets/${albumImg}`)" />
+    <div class="footer-left d-flex align-items-center" v-if="audio.playing && playList">
+      <img v-if="albumImg" class="left_img" :src="require(`@/assets/${albumImg}`)" />
       <div class="song-title ml-3">
         <span class="text-white">{{ songName }}</span>
         <span class="text-white-50 ml-1" style="font-size:15px;">{{ songArtist }}</span>
@@ -11,10 +11,10 @@
     <div class="footer-center d-flex justify-content-center align-items-center flex-column">
       <div class="center-img d-flex justify-content-between mb-2">
         <img v-if="prevVerify" @click="setSong(-1)" :src="require('@/assets/img/back.png')" alt />
-        <img v-else style="opacity: 0.5;" :src="require('@/assets/img/back.png')" alt />
+        <img v-else style="opacity: 0.5;cursor:auto;" :src="require('@/assets/img/back.png')" alt />
 
         <img
-          v-if="!playStatus"
+          v-if="!audio.playStatus"
           @click="$emit('playBtn')"
           :src="require('@/assets/img/play.png')"
           alt
@@ -22,7 +22,7 @@
         <img v-else @click="$emit('playBtn')" :src="require('@/assets/img/pause.png')" alt />
 
         <img v-if="nextVerify" @click="setSong(1)" :src="require('@/assets/img/next.png')" alt />
-        <img v-else style="opacity: 0.5;" :src="require('@/assets/img/next.png')" alt />
+        <img v-else style="opacity: 0.5;cursor:auto;" :src="require('@/assets/img/next.png')" alt />
       </div>
       <div class="d-flex align-items-center" style="width:100%;">
         <div class="progress" style="height: 5px;width: 100%;cursor:pointer;" @click="scheduleCha">
@@ -56,37 +56,28 @@ export default {
     currentTime: {
       type: String,
     },
-    playStatus: {
-      type: Boolean,
-    },
-    playIndex: {
-      type: Number,
-    },
-    listLength: {
-      type: Number,
+    audio: {
+      type: Object,
     },
     playList: {
       type: Array,
-    },
-    album: {
-      type: Object,
-    },
+    }
   },
   computed: {
     nextVerify() {
-      return this.playIndex + 1 < this.listLength;
+      return this.audio.playIndex + 1 < this.playList.length;
     },
     prevVerify() {
-      return this.playIndex - 1 >= 0;
+      return this.audio.playIndex - 1 >= 0;
     },
     songName() {
-      return this.playList ? this.playList[this.playIndex].name : " ";
+      return this.playList[this.audio.playIndex].title;
     },
     songArtist() {
-      return this.playList ? this.playList[this.playIndex].artist : " ";
+      return this.playList[this.audio.playIndex].artist;
     },
     albumImg() {
-      return this.album ? this.album.img_path : " ";
+      return this.playList[this.audio.playIndex].img_path;
     },
   },
   methods: {
@@ -97,10 +88,7 @@ export default {
       this.$emit("scheduleCha", e);
     },
     setSong(index) {
-      if (
-        this.playIndex + index >= 0 &&
-        this.playIndex + index < this.listLength
-      ) {
+      if (this.nextVerify || this.prevVerify) {
         this.$emit("setSong", index);
       }
     },
@@ -118,10 +106,9 @@ export default {
 .footer-left {
   grid-area: footer-left;
 }
-.footer-left img {
+.left_img {
   height: 80px;
   width: 80px;
-  object-fit: cover;
 }
 .footer-center {
   grid-area: footer-center;

@@ -8,16 +8,10 @@ class MainPlayer {
   }
 
   setSonglist(array) {
-    array.forEach((v, i) => {
-      let source = document.createElement("source");
-      source.src = require("@/assets/" + v);
-      source.type = "audio/mp3";
-      this.MainPlayer.appendChild(source);
-      this.playlist[i] = v;
-    });
+    this.playlist = array;
   }
   setCurrentAudio(index) {
-    this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index]));
+    this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index].song_path));
     this.playing = true;
     this.playIndex = index;
     localStorage.setItem("playIndex", index);

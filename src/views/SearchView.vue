@@ -25,6 +25,7 @@
                 <div class="text-white-50" style="font-size:14px;">
                   <span>{{ song.artist }}</span>
                   <span class="ml-3">{{ song.composer }}</span>
+                  <span class="ml-3">{{ song.album_name }}</span>
                 </div>
               </div>
               <div class="text-white-50 d-flex align-items-center justify-content-end">
@@ -49,26 +50,30 @@ export default {
   data() {
     return {
       keyword: "",
-      song_array: [],
-      search_key:["title","album","compoer","artist"]
+      song_array: []
     };
   },
   watch: {
     keyword: function (k) {
       var result = [];
-      var array = k.split(" ");
-      array.forEach((e) => {
-        let condition = e.split(":");
-        if (condition.length == 2 && condition[1].length > 2 && this.search_key.some(x => x==condition[0])) {
-          if(condition[0] == "album"){
+      var array = [];
+      var space = k.match(/(title|artist|composer|album):"(\w|\s){3,}"/g);
+      var word = k.match(/(title|artist|composer|album):\w{3,}/g);
+      if (space != null || word != null) {
+        array = array.concat(word, space);
+        array = array.filter((x) => x);
+        array.forEach((e) => {
+          let condition = e.split(":");
+          condition[1] = condition[1].replace(/"/g, "");
+          if (condition[0] == "album") {
             result.unshift(condition);
-          }else{
+          } else {
             result.push(condition);
           }
-        }
-      });
-      console.log(result)
-      if(result.length > 0) this.song_array = this.select(result,0,this.all_album);    
+        });
+      }
+      this.song_array =
+        result.length > 0 ? this.select(result, this.all_album) : [];
     },
   },
   methods: {
@@ -79,15 +84,15 @@ export default {
     //     if(array[0][0] == "album" || index > 0){
     //       let key = array[index][0] == "album" ? "title" : array[index][0];
     //       data.forEach(album=>{
-    //         if(album[key].indexOf(array[index][1]) > -1){              
+    //         if(album[key].indexOf(array[index][1]) > -1){
     //           result = index > 0? result.concat(album) : result.concat(album.songlist);
     //         }
     //       })
-    //     }else{          
+    //     }else{
     //       data.forEach(album=>{
-    //         album.songlist.forEach(song=>{              
+    //         album.songlist.forEach(song=>{
     //           if(song[array[index][0]].indexOf(array[index][1]) > -1){
-    //             result = result.concat(song);                
+    //             result = result.concat(song);
     //           }
     //         })
     //       })
@@ -95,13 +100,41 @@ export default {
 
     //     result = result.filter(x=>set.has(x.title)?false:set.add(x.title));
     //     return this.select(array,index+1,result);
-    //   }else{        
+    //   }else{
     //     return data;
     //   }
     // }
-    select(){
-      
-    }
+    select(search_array, data) {
+      var result = [];
+      var set = new Set();
+
+      search_array.forEach((arr) => {
+        if (arr[0] == "album") {
+          data.forEach((album) => {
+            if (
+              album["title"].toLowerCase().indexOf(arr[1].toLowerCase()) > -1
+            ) {
+              result = result.concat(album.songlist);
+            }
+          });
+        } else {
+          data.forEach((album) => {
+            album.songlist.forEach((song) => {
+              if (
+                song[arr[0]].toLowerCase().indexOf(arr[1].toLowerCase()) > -1
+              ) {
+                result = result.concat(song);
+              }
+            });
+          });
+        }
+      });
+
+      result = result.filter((x) =>
+        set.has(x.title) ? false : set.add(x.title)
+      );
+      return result;
+    },
   },
 };
 </script>

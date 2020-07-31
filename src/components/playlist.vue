@@ -12,7 +12,7 @@
         </div>
         <div>
           <div>{{ song.title }}</div>
-          <div class="text-white-50" style="font-size:14px;">{{ album.artist }}</div>
+          <div class="text-white-50" style="font-size:14px;">{{ song.artist }}</div>
         </div>
         <div class="text-white-50 text-right">
           <span>00:00</span>&emsp;
@@ -26,9 +26,6 @@
 <script>
 export default {
   props: {
-    album: {
-      type: Object,
-    },
     playList: {
       type: Array,
     },
@@ -40,8 +37,8 @@ export default {
     songRemove(index) {
       let old = this.playList[this.audio.playIndex];
       this.playList.splice(index, 1);
-      this.audio.playlist.splice(index, 1);
-      this.audio.playIndex = this.playList.findIndex((e) => e.name == old.name);
+      this.audio.playlist = this.playList;
+      this.audio.playIndex = this.playList.findIndex((e) => e.title == old.title);
       localStorage.setItem("playIndex", this.audio.playIndex);
       localStorage.setItem("list", JSON.stringify(this.playList));
     },

@@ -24,14 +24,24 @@
     <div class="song-list text-white d-flex flex-column">
       <div class="song-bg" v-for="(song, index) in album.songlist" :key="song.title">
         <div class="song my-3 mx-5">
+          <div class="d-flex align-items-center">
+            <img
+              class="songPlay"
+              style="width: 20px;object-fit:cover;"
+              :src="require('@/assets/img/play.png')"
+              @click="$emit('searchPlay',song)"
+            />
+          </div>
+          <div class="songJoin text-left" style="font-size:35px;" @click="$emit('join',song)">+</div>
           <div>
             <span>{{ index+1 }}</span>
           </div>
           <div>
             <div>{{ song.title }}</div>
             <div class="text-white-50" style="font-size:14px;">
-              <span>{{ album.artist }}</span>
-              <span class="ml-3">{{ song.composer }}</span>
+              <span>演唱：{{ album.artist }}</span>
+              <span class="ml-3">作曲：{{ song.composer }}</span>
+              <span class="ml-3">{{ album.title }}</span>
             </div>
           </div>
           <div class="text-white-50 d-flex align-items-center justify-content-end">
@@ -96,7 +106,7 @@ export default {
 }
 .song {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr;
+  grid-template-columns: 50px 50px 30px 1fr 1fr;
 }
 .song-bg {
   width: 100%;
@@ -104,5 +114,13 @@ export default {
 .song-bg:hover {
   transition: 0.5s;
   background: rgba(255, 255, 255, 0.1);
+}
+.songJoin:hover {
+  color: green;
+  cursor: pointer;
+}
+.songPlay:hover {
+  opacity: 0.5;
+  cursor: pointer;
 }
 </style>
