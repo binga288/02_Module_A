@@ -5,7 +5,7 @@
         <Controll :playStatus="AudioPlayer.playStatus" />
       </div>
       <div class="center">
-        <songList v-if="listShow" class="songList" :audio="AudioPlayer" :playList="playList" />
+        <songList v-if="listShow" @setSong="setNextSong" class="songList" :audio="AudioPlayer" :playList="playList" />
         <transition name="fade" mode="out-in">
           <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay" />
         </transition>
@@ -92,12 +92,12 @@ export default {
           this.AudioPlayer.stop();
         });
         navigator.mediaSession.setActionHandler("previoustrack", () => {
-          if (this.AudioPlayer.playIndex - 1 >= 0) this.setSong(-1);
+          if (this.AudioPlayer.playIndex - 1 >= 0) this.setSong(this.AudioPlayer.playIndex - 1);
         });
         navigator.mediaSession.setActionHandler("nexttrack", () => {
-          if (this.AudioPlayer.playIndex + 1 < this.playList.length)
-            this.setSong(1);
+          if (this.AudioPlayer.playIndex + 1 < this.playList.length) this.setSong(this.AudioPlayer.playIndex + 1);
         });
+
       });
 
       this.AudioPlayer.on("timeupdate", () => {
@@ -142,8 +142,7 @@ export default {
       );
     },
     setNextSong(index) {
-      let nextIndex = this.AudioPlayer.playIndex + index;
-      this.AudioPlayer.setCurrentAudio(nextIndex);
+      this.AudioPlayer.setCurrentAudio(index);
       this.AudioPlayer.play();
     },
     join(song) {
@@ -154,7 +153,7 @@ export default {
         this.AudioPlayer.playlist = this.playList;
         this.listShow = true;
         if (!this.AudioPlayer.playing) {
-          this.PrePlay(this.playList, false);
+          this.PrePlay(this.playList);
         } else {
           localStorage.setItem("list", JSON.stringify(this.playList));
         }
@@ -162,19 +161,15 @@ export default {
     },
     searchPlay(song) {
       if (this.playList.findIndex((e) => e.title == song.title) > -1) {
-        this.AudioPlayer.setCurrentAudio(
-          this.playList.findIndex((e) => e.title == song.title)
-        );
-        this.AudioPlayer.play();
+        this.setNextSong(this.playList.findIndex((e) => e.title == song.title));
       } else {
         this.playList.push(song);
         this.AudioPlayer.playlist = this.playList;
         this.listShow = true;
         if (!this.AudioPlayer.playing) {
-          this.PrePlay(this.playList, false);
+          this.PrePlay(this.playList);
         } else {
-          this.AudioPlayer.setCurrentAudio(this.playList.length - 1);
-          this.AudioPlayer.play();
+          this.setNextSong(this.playList.length - 1);
           localStorage.setItem("list", JSON.stringify(this.playList));
         }
       }

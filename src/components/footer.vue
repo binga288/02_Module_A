@@ -10,7 +10,7 @@
     </div>
     <div class="footer-center d-flex justify-content-center align-items-center flex-column">
       <div class="center-img d-flex justify-content-between mb-2">
-        <img v-if="prevVerify" @click="setSong(-1)" :src="require('@/assets/img/back.png')" alt />
+        <img v-if="prevVerify" @click="setSong(audio.playIndex - 1)" :src="require('@/assets/img/back.png')" alt />
         <img v-else style="opacity: 0.5;cursor:auto;" :src="require('@/assets/img/back.png')" alt />
 
         <img
@@ -21,7 +21,7 @@
         />
         <img v-else @click="$emit('playBtn')" :src="require('@/assets/img/pause.png')" alt />
 
-        <img v-if="nextVerify" @click="setSong(1)" :src="require('@/assets/img/next.png')" alt />
+        <img v-if="nextVerify" @click="setSong(audio.playIndex + 1)" :src="require('@/assets/img/next.png')" alt />
         <img v-else style="opacity: 0.5;cursor:auto;" :src="require('@/assets/img/next.png')" alt />
       </div>
       <div class="d-flex align-items-center" style="width:100%;">
@@ -61,7 +61,7 @@ export default {
     },
     playList: {
       type: Array,
-    }
+    },
   },
   computed: {
     nextVerify() {
@@ -93,6 +93,13 @@ export default {
       }
     },
   },
+  created(){
+    fetch("./assets/lyrics/twenty-one-pilots-Stressed-Out_simple.lrc")
+    .then(res=>res.json())
+    .then(res=>{
+      console.log(res)
+    });
+  }
 };
 </script>
 

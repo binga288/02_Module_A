@@ -44,8 +44,7 @@ export default {
     },
     songPlay(index) {
       if (this.audio.playIndex != index) {
-        this.audio.setCurrentAudio(index);
-        this.audio.play();
+        this.$emit('setSong',index);
       }
     },
   },
