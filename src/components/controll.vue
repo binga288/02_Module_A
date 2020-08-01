@@ -60,14 +60,13 @@ export default {
     var main = document.querySelector(".effect");
 
     for (let i = 0; i < 100; i++) {
-      let div = document.createElement("div");
+      var div = document.createElement("div");
       div.style.transform = `translate(${Math.floor(
         Math.random() * 20
       )}vw,${Math.floor(Math.random() * 100)}vh)`;
       div.style.background = `hsl(${Math.floor(Math.random() * 360)},100%,65%)`;
-      div.style.animationDelay = Math.random() * -0.01 + "s";
-      div.style.animationDuration = Math.random() + 1 + "s";
-      div.classList = ["partical"];
+      div.style.animationDuration = Math.random() * 2 + "s";
+      div.className = "partical";
       main.appendChild(div);
     }
   },
