@@ -5,13 +5,19 @@ class MainPlayer {
     this.playing = false;
     this.playIndex = 0;
     this.playlist = [];
+    this.lyrics = [];
+    this.lyric_index = 0;
   }
-
+  setLyricIndex(index){
+    this.lyric_index = index;
+    localStorage.setItem("lyrics_index",index);
+  }
   setSonglist(array) {
     this.playlist = array;
   }
   setCurrentAudio(index) {
     this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index].song_path));
+    this.lyrics = [];
     this.playing = true;
     this.playIndex = index;
     localStorage.setItem("playIndex", index);

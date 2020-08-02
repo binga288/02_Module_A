@@ -5,7 +5,13 @@
         <Controll :playStatus="AudioPlayer.playStatus" />
       </div>
       <div class="center">
-        <songList v-if="listShow" @setSong="setNextSong" class="songList" :audio="AudioPlayer" :playList="playList" />
+        <songList
+          v-if="listShow"
+          @setSong="setNextSong"
+          class="songList"
+          :audio="AudioPlayer"
+          :playList="playList"
+        />
         <transition name="fade" mode="out-in">
           <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay" />
         </transition>
@@ -17,10 +23,12 @@
           @scheduleCha="scheduleCha"
           @setSong="setNextSong"
           @songListShow="songListShow"
-          :currentTime="currentTime"
-          :durationTime="durationTime"
+          :currentTime="currentTime * 1"
+          :durationTime="durationTime * 1"
           :audio="AudioPlayer"
           :playList="playList"
+          :lyric_file="lyric_file"
+          :lyric_type="lyric_type"
         />
       </div>
     </div>
@@ -43,14 +51,16 @@ export default {
   data() {
     return {
       AudioPlayer: audio(),
-      currentTime: "00:00",
-      durationTime: "00:00",
+      currentTime: localStorage.getItem("currentTime") || 0,
+      durationTime: localStorage.getItem("durationTime") || 0,
       soundBar: null,
       scheduleBar: null,
       playList: [],
       songName: "",
       songArtist: "",
       listShow: false,
+      lyric_file: "",
+      lyric_type: "",
     };
   },
   methods: {
@@ -92,23 +102,34 @@ export default {
           this.AudioPlayer.stop();
         });
         navigator.mediaSession.setActionHandler("previoustrack", () => {
-          if (this.AudioPlayer.playIndex - 1 >= 0) this.setSong(this.AudioPlayer.playIndex - 1);
+          if (this.AudioPlayer.playIndex - 1 >= 0)
+            this.setSong(this.AudioPlayer.playIndex - 1);
         });
         navigator.mediaSession.setActionHandler("nexttrack", () => {
-          if (this.AudioPlayer.playIndex + 1 < this.playList.length) this.setSong(this.AudioPlayer.playIndex + 1);
+          if (this.AudioPlayer.playIndex + 1 < this.playList.length)
+            this.setSong(this.AudioPlayer.playIndex + 1);
         });
-
+        this.lyric_file = "";
+        this.lyric_type = "";
+        if (song.lyric_path) {          
+          fetch(`${process.env.BASE_URL}${song.lyric_path}`)
+            .then((res) => res.text())
+            .then((res) => {
+              this.lyric_file = res;
+              this.lyric_type = song.lyric_path.match(/(\w{3})$/g)[0];
+            });
+        }
       });
 
       this.AudioPlayer.on("timeupdate", () => {
-        const current = this.AudioPlayer.getCurrentTime() | "00:00";
-        const duration = this.AudioPlayer.getDuration() | "00:00";
-        this.currentTime = this.AudioPlayer.formatTime(current);
-        this.durationTime = this.AudioPlayer.formatTime(duration);
+        this.currentTime = this.AudioPlayer.getCurrentTime();
+        this.durationTime = this.AudioPlayer.getDuration();
 
-        this.scheduleBar.style.width = `${(current / duration) * 100}%`;
-        localStorage.setItem("currentTime", current);
-        localStorage.setItem("durationTime", duration);
+        this.scheduleBar.style.width = `${
+          (this.currentTime / this.durationTime) * 100
+        }%`;
+        localStorage.setItem("currentTime", this.currentTime);
+        localStorage.setItem("durationTime", this.durationTime);
       });
     },
     defaultPre(obj) {
@@ -191,7 +212,7 @@ export default {
       localStorage.setItem("playing", true);
     },
   },
-  created() {
+  created() {    
     let list = JSON.parse(localStorage.getItem("list"));
     this.playList = list ? list : [];
     list ? this.defaultPre(this.playList) : "";
@@ -214,14 +235,10 @@ export default {
     }
 
     if (localStorage.getItem("playing")) {
-      const current = localStorage.getItem("currentTime");
-      const duration = localStorage.getItem("durationTime");
-
-      this.AudioPlayer.setCurrentTime(current);
-      this.currentTime = this.AudioPlayer.formatTime(current);
-      this.durationTime = this.AudioPlayer.formatTime(duration);
-
-      this.scheduleBar.style.width = `${(current / duration) * 100}%`;
+      this.AudioPlayer.setCurrentTime(this.currentTime);
+      this.scheduleBar.style.width = `${
+        (this.currentTime / this.durationTime) * 100
+      }%`;
     }
   },
 };

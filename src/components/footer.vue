@@ -5,7 +5,9 @@
       <div class="song-title ml-3">
         <span class="text-white">{{ songName }}</span>
         <span class="text-white-50 ml-1" style="font-size:15px;">{{ songArtist }}</span>
-        <div class="text-white-50" style="font-size:15px;">{{ lyrics[lyrics_index] }}</div>
+        <div class="text-white-50" style="font-size:15px;">
+          <div v-if="audio.lyrics[audio.lyric_index]">{{ audio.lyrics[audio.lyric_index][1] }}</div>
+        </div>
       </div>
     </div>
     <div class="footer-center d-flex justify-content-center align-items-center flex-column">
@@ -38,7 +40,7 @@
         <div class="progress" style="height: 5px;width: 100%;cursor:pointer;" @click="scheduleCha">
           <div class="progress-bar bg-success" style="pointer-events:none;" id="schedule"></div>
         </div>
-        <div class="text-white-50 ml-2">{{ currentTime }}/{{ durationTime }}</div>
+        <div class="text-white-50 ml-2">{{ currentStr }}/{{ durationStr }}</div>
       </div>
     </div>
     <div class="footer-right d-flex justify-content-end align-items-center">
@@ -61,16 +63,22 @@
 export default {
   props: {
     durationTime: {
-      type: String,
+      type: Number,
     },
     currentTime: {
-      type: String,
+      type: Number,
     },
     audio: {
       type: Object,
     },
     playList: {
       type: Array,
+    },
+    lyric_file: {
+      type: String,
+    },
+    lyric_type: {
+      type: String,
     },
   },
   computed: {
@@ -89,14 +97,14 @@ export default {
     albumImg() {
       return this.playList[this.audio.playIndex].img_path;
     },
-  },
-  data() {
-    return {
-      lyrics: [],
-      time: [],
-      file: [],
-      lyrics_index: 0,
-    };
+    currentStr() {
+      return this.audio.formatTime(this.currentTime) || "00:00";
+    },
+    durationStr() {
+      return this.durationTime
+        ? this.audio.formatTime(this.durationTime)
+        : "00:00";
+    },
   },
   methods: {
     soundCha(e) {
@@ -112,33 +120,51 @@ export default {
     },
   },
   watch: {
-    file: function () {
-      let match = this.file.match(/\[(\d{2}):(\d{2}.\d{2})\](\w|.)+/g);
-      match.forEach((x) => {
-        let split = x.split("]");
-        let time_str = split[0].replace(/(\[|\])/g, "");
-        time_str = time_str.split(":");
-        this.time.push(time_str[0] * 60 + time_str[1] * 1);
-        this.lyrics.push(split[1]);
-      });
-      this.lyrics_len = this.lyrics.length;
+    lyric_file: function () {
+      if (this.lyric_file) {
+        this.audio.setLyricIndex(localStorage.getItem("lyrics_index") * 1 || 0);
+        if (this.lyric_type == "lrc") {
+          let match = this.lyric_file.split("\r\n");
+          match.forEach((x) => {
+            if (/(\[\d{2}):(\d{2}.\d{2}\])+/.test(x)) {
+              let time = x.match(/(\d{2}):(\d{2}.\d{2})/g);
+              time.forEach((i) => {
+                let time_str = i.split(":");
+                this.audio.lyrics.push([
+                  time_str[0] * 60 + time_str[1] * 1,
+                  x.split("]")[time.length],
+                ]);
+              });
+            }
+          });
+        } else if (this.lyric_type == "srt") {
+          let match = this.lyric_file.split("\r\n\r\n");
+          match.forEach((k) => {
+            let array = k.match(/((\w|.)+)/g);
+            if (array != null) {
+              var time = array[1].match(/(\d+:)+\d+,\d+/g);
+              time = time[0].replace(",", ".").split(":");
+              this.audio.lyrics.push([
+                time[0] * 3600 + time[1] * 60 + time[2] * 1,
+                array.slice(2, array.length).join(" "),
+              ]);
+            }
+          });
+        }
+        this.audio.lyrics.sort((i, x) => i[0] - x[0]);
+      }
     },
     currentTime: function () {
-      var now = this.currentTime.split(":");
-      now = now[0] * 60 + now[1] * 1;
-      this.time.forEach((v, i) => {
-        if (v <= now &&(this.time[i + 1] >= now || this.time[i + 1] == undefined)) {
-          this.lyrics_index = i;
-        }
-      });
+      if (this.lyric_file) {
+        var lyric = 0;
+        this.audio.lyrics.forEach((v, i) => {
+          if (v[0] < this.currentTime) {
+            lyric = i;
+          }
+        });
+        this.audio.setLyricIndex(lyric);
+      }
     },
-  },
-  created() {
-    fetch(`${process.env.BASE_URL}lyrics/StressedOut.lrc`)
-      .then((res) => res.text())
-      .then((res) => {
-        this.file = res;
-      });
   },
 };
 </script>
@@ -146,7 +172,7 @@ export default {
 <style scoped>
 .footer-content {
   display: grid;
-  grid-template-columns: 30% 40% 30%;
+  grid-template-columns: 32% 38% 30%;
   grid-template-areas: "footer-left footer-center footer-right";
   height: 100%;
 }
