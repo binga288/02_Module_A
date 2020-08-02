@@ -76,12 +76,11 @@ export default {
           this.AudioPlayer = audio();
           this.defaultPre(this.playList);
           this.AudioPlayer.setCurrentAudio(0);
-        } else {
+        } else {          
           this.AudioPlayer.setCurrentAudio(index);
           this.AudioPlayer.play();
         }
       });
-
       this.AudioPlayer.on("canplaythrough", () => {
         let song = this.playList[this.AudioPlayer.playIndex];
         navigator.mediaSession.metadata = new window.MediaMetadata({
@@ -103,15 +102,15 @@ export default {
         });
         navigator.mediaSession.setActionHandler("previoustrack", () => {
           if (this.AudioPlayer.playIndex - 1 >= 0)
-            this.setSong(this.AudioPlayer.playIndex - 1);
+            this.setNextSong(this.AudioPlayer.playIndex - 1);
         });
         navigator.mediaSession.setActionHandler("nexttrack", () => {
           if (this.AudioPlayer.playIndex + 1 < this.playList.length)
-            this.setSong(this.AudioPlayer.playIndex + 1);
+            this.setNextSong(this.AudioPlayer.playIndex + 1);
         });
         this.lyric_file = "";
         this.lyric_type = "";
-        if (song.lyric_path) {          
+        if (song.lyric_path) {
           fetch(`${process.env.BASE_URL}${song.lyric_path}`)
             .then((res) => res.text())
             .then((res) => {
@@ -167,6 +166,9 @@ export default {
       this.AudioPlayer.play();
     },
     join(song) {
+      if (this.AudioPlayer.requireTry(song)) {
+        return false;
+      }
       if (this.playList.some((e) => e.title == song.title)) {
         alert("歌曲已被加入");
       } else {
@@ -181,6 +183,9 @@ export default {
       }
     },
     searchPlay(song) {
+      if (this.AudioPlayer.requireTry(song)) {
+        return false;
+      }
       if (this.playList.findIndex((e) => e.title == song.title) > -1) {
         this.setNextSong(this.playList.findIndex((e) => e.title == song.title));
       } else {
@@ -212,7 +217,7 @@ export default {
       localStorage.setItem("playing", true);
     },
   },
-  created() {    
+  created() {
     let list = JSON.parse(localStorage.getItem("list"));
     this.playList = list ? list : [];
     list ? this.defaultPre(this.playList) : "";

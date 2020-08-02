@@ -151,6 +151,7 @@ export default {
             }
           });
         }
+        this.audio.lyrics = this.audio.lyrics.filter(x=>x[1] != "");
         this.audio.lyrics.sort((i, x) => i[0] - x[0]);
       }
     },

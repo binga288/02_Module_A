@@ -22,11 +22,17 @@
           <span>{{ index+1 }}</span>
         </div>
         <div>
-          <div>{{ song.title }}</div>
+          <div :class='{"search":song.search.indexOf("title") > -1}'>{{ song.title }}</div>
           <div class="text-white-50" style="font-size:14px;">
-            <span>演唱：{{ song.artist }}</span>
-            <span class="ml-3">作曲：{{ song.composer }}</span>
-            <span class="ml-3">{{ song.album_name }}</span>
+            <span :class='{"search":song.search.indexOf("artist") > -1}'>演唱：{{ song.artist }}</span>
+            <span
+              :class='{"search":song.search.indexOf("composer") > -1}'
+              class="ml-3"
+            >作曲：{{ song.composer }}</span>
+            <span
+              :class='{"search":song.search.indexOf("album") > -1}'
+              class="ml-3"
+            >{{ song.album_name }}</span>
           </div>
         </div>
         <div class="text-white-50 d-flex align-items-center justify-content-end">
@@ -104,33 +110,26 @@ export default {
     // }
     select(search_array, data) {
       var result = [];
-      var set = new Set();
-
-      search_array.forEach((arr) => {
-        if (arr[0] == "album") {
-          data.forEach((album) => {
-            if (
-              album["title"].toLowerCase().indexOf(arr[1].toLowerCase()) > -1
-            ) {
-              result = result.concat(album.songlist);
+      data.forEach((album) => {
+        album.songlist.forEach((song) => {
+          let verify = false;
+          song.search = [];
+          search_array.forEach((key) => {
+            if(key[0] == "album"){
+              if (song.album_name.toLowerCase().indexOf(key[1].toLowerCase()) > -1) {
+                song.search.push(key[0]);
+                verify = true;
+              }
+            }else{
+              if (song[key[0]].toLowerCase().indexOf(key[1].toLowerCase()) > -1) {
+                song.search.push(key[0]);
+                verify = true;
+              }
             }
           });
-        } else {
-          data.forEach((album) => {
-            album.songlist.forEach((song) => {
-              if (
-                song[arr[0]].toLowerCase().indexOf(arr[1].toLowerCase()) > -1
-              ) {
-                result = result.concat(song);
-              }
-            });
-          });
-        }
+          if (verify) result = result.concat(song);          
+        });
       });
-
-      result = result.filter((x) =>
-        set.has(x.title) ? false : set.add(x.title)
-      );
       return result;
     },
   },
@@ -156,5 +155,8 @@ export default {
 .songPlay:hover {
   opacity: 0.5;
   cursor: pointer;
+}
+.search {
+  color: green;
 }
 </style>

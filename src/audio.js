@@ -8,20 +8,34 @@ class MainPlayer {
     this.lyrics = [];
     this.lyric_index = 0;
   }
-  setLyricIndex(index){
+  setLyricIndex(index) {
     this.lyric_index = index;
-    localStorage.setItem("lyrics_index",index);
+    localStorage.setItem("lyrics_index", index);
   }
   setSonglist(array) {
     this.playlist = array;
   }
+  requireTry(song){
+    try {
+      require("@/assets/" + song.song_path);
+    }catch{
+      alert("無法讀取檔案");
+      return true;
+    }
+    return false;
+  }
   setCurrentAudio(index) {
+    if (this.requireTry(this.playlist[index])) {
+      this.playlist.splice(index,1);
+      this.setCurrentAudio(index);
+    }
     this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index].song_path));
     this.lyrics = [];
     this.playing = true;
     this.playIndex = index;
     localStorage.setItem("playIndex", index);
-    this.MainPlayer.load();    
+    this.MainPlayer.load();
+    return true;
   }
   play() {
     this.playStatus = true;
