@@ -221,6 +221,8 @@ export default {
     let list = JSON.parse(localStorage.getItem("list"));
     this.playList = list ? list : [];
     list ? this.defaultPre(this.playList) : "";
+    this.AudioPlayer.can = document.getElementById("effect");
+    this.AudioPlayer.ctx = this.AudioPlayer.can.getContext("2d");
   },
   mounted() {
     document.addEventListener("keypress", (e) => {

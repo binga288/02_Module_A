@@ -35,6 +35,7 @@ class MainPlayer {
     this.playIndex = index;
     localStorage.setItem("playIndex", index);
     this.MainPlayer.load();
+    this.audioEffect();
     return true;
   }
   play() {
@@ -70,6 +71,31 @@ class MainPlayer {
   }
   getAudioInfo() {
     return this.MainPlayer;
+  }
+  audioEffect(){
+    var context = new AudioContext();
+    var source = context.createMediaElementSource(this.MainPlayer);
+    var analyser = context.createAnalyser();
+
+    source.connect(analyser);
+    analyser.connect(context.destination);
+
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+
+    var bar_width = this.can.width / bufferLength;
+    function renderFrame(){
+      requestAnimationFrame(renderFrame);
+      var x = 0;
+      analyser.getByteFrequencyData(dataArray);
+
+      for (var i = 0; i < bufferLength; i++) {
+        let bar_height = dataArray[i];
+        this.ctx.fillRect(x,this.can.height - bar_height,bar_width,bar_height);
+        x += bar_width + 1;        
+      }
+    }
+    renderFrame();
   }
 }
 function getAudio() {

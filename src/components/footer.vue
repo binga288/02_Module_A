@@ -144,6 +144,7 @@ export default {
             if (array != null) {
               var time = array[1].match(/(\d+:)+\d+,\d+/g);
               time = time[0].replace(",", ".").split(":");
+              console.log(array)
               this.audio.lyrics.push([
                 time[0] * 3600 + time[1] * 60 + time[2] * 1,
                 array.slice(2, array.length).join(" "),

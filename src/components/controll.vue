@@ -14,29 +14,12 @@
         </div>
       </router-link>
     </div>
-    <div class="effect" v-show="playStatus"></div>
+    <canvas id="effect" v-show="playStatus"></canvas>
   </div>
 </template>
-<style >
-.partical {
+<style>
+#effect{
   position: absolute;
-  width: 4px;
-  height: 4px;
-  animation-name: shoot, fade;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-out;
-}
-
-@keyframes shoot {
-  0% {
-    transform: translate(10vw, 40vh);
-  }
-}
-
-@keyframes fade {
-  to {
-    opacity: 0;
-  }
 }
 .option {
   font-size: 25px;
