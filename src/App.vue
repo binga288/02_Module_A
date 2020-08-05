@@ -2,7 +2,7 @@
   <div id="app">
     <div class="main">
       <div class="left">
-        <Controll :playStatus="AudioPlayer.playStatus" />
+        <Controll :playStatus="AudioPlayer.playStatus" :audio="AudioPlayer" />
       </div>
       <div class="center">
         <songList
@@ -13,13 +13,12 @@
           :playList="playList"
         />
         <transition name="fade" mode="out-in">
-          <router-view @albumList="albumList" @join="join" @searchPlay="searchPlay" />
+          <router-view @albumList="albumList" @songPlay="songPlay" />
         </transition>
       </div>
       <div class="player">
         <Footer
           @playBtn="playBtn"
-          @soundCha="soundCha"
           @scheduleCha="scheduleCha"
           @setSong="setNextSong"
           @songListShow="songListShow"
@@ -76,15 +75,16 @@ export default {
           this.AudioPlayer = audio();
           this.defaultPre(this.playList);
           this.AudioPlayer.setCurrentAudio(0);
-        } else {          
+        } else {
           this.AudioPlayer.setCurrentAudio(index);
           this.AudioPlayer.play();
         }
       });
       this.AudioPlayer.on("canplaythrough", () => {
+        this.durationTime = this.AudioPlayer.getDurationTime();
         let song = this.playList[this.AudioPlayer.playIndex];
         navigator.mediaSession.metadata = new window.MediaMetadata({
-          title: song.name,
+          title: song.titlw,
           album: song.album_name,
           artist: song.artist,
           artwork: [
@@ -122,8 +122,6 @@ export default {
 
       this.AudioPlayer.on("timeupdate", () => {
         this.currentTime = this.AudioPlayer.getCurrentTime();
-        this.durationTime = this.AudioPlayer.getDuration();
-
         this.scheduleBar.style.width = `${
           (this.currentTime / this.durationTime) * 100
         }%`;
@@ -148,54 +146,38 @@ export default {
         this.AudioPlayer.stop();
       }
     },
-    soundCha(e) {
-      const sound = e.offsetX / e.target.clientWidth;
-      this.soundBar.style.width = `${sound * 100}%`;
-      this.AudioPlayer.chaSound(sound);
-    },
-    scheduleCha(e) {
+    scheduleCha(e, type) {
       const schedule = e.offsetX / e.target.clientWidth;
-
-      this.scheduleBar.style.width = `${schedule * 100}%`;
-      this.AudioPlayer.setCurrentTime(
-        this.AudioPlayer.getDuration() * schedule
-      );
+      if (type == "playBar") {
+        this.scheduleBar.style.width = `${schedule * 100}%`;
+        this.AudioPlayer.setCurrentTime(this.durationTime * schedule);
+      } else {
+        this.soundBar.style.width = `${schedule * 100}%`;
+        this.AudioPlayer.chaSound(schedule);
+      }
     },
     setNextSong(index) {
       this.AudioPlayer.setCurrentAudio(index);
       this.AudioPlayer.play();
     },
-    join(song) {
+    songPlay(song, type) {
       if (this.AudioPlayer.requireTry(song)) {
         return false;
       }
       if (this.playList.some((e) => e.title == song.title)) {
-        alert("歌曲已被加入");
+        type == "join"
+          ? alert("歌曲已被加入")
+          : this.setNextSong(
+              this.playList.findIndex((e) => e.title == song.title)
+            );
       } else {
         this.playList.push(song);
         this.AudioPlayer.playlist = this.playList;
         this.listShow = true;
         if (!this.AudioPlayer.playing) {
-          this.PrePlay(this.playList);
+          this.PrePlay();
         } else {
-          localStorage.setItem("list", JSON.stringify(this.playList));
-        }
-      }
-    },
-    searchPlay(song) {
-      if (this.AudioPlayer.requireTry(song)) {
-        return false;
-      }
-      if (this.playList.findIndex((e) => e.title == song.title) > -1) {
-        this.setNextSong(this.playList.findIndex((e) => e.title == song.title));
-      } else {
-        this.playList.push(song);
-        this.AudioPlayer.playlist = this.playList;
-        this.listShow = true;
-        if (!this.AudioPlayer.playing) {
-          this.PrePlay(this.playList);
-        } else {
-          this.setNextSong(this.playList.length - 1);
+          type != "join" ? this.setNextSong(this.playList.length - 1) : "";
           localStorage.setItem("list", JSON.stringify(this.playList));
         }
       }
@@ -205,15 +187,14 @@ export default {
         this.playList = album.songlist;
         this.AudioPlayer.stop();
         this.AudioPlayer = audio();
-        this.PrePlay(album.songlist);
+        this.PrePlay();
       }
     },
-    PrePlay(list) {
+    PrePlay() {
       localStorage.clear();
-      this.defaultPre(list);
+      this.defaultPre(this.playList);
       this.AudioPlayer.play();
 
-      localStorage.setItem("list", JSON.stringify(list));
       localStorage.setItem("playing", true);
     },
   },
@@ -221,8 +202,6 @@ export default {
     let list = JSON.parse(localStorage.getItem("list"));
     this.playList = list ? list : [];
     list ? this.defaultPre(this.playList) : "";
-    this.AudioPlayer.can = document.getElementById("effect");
-    this.AudioPlayer.ctx = this.AudioPlayer.can.getContext("2d");
   },
   mounted() {
     document.addEventListener("keypress", (e) => {
@@ -269,8 +248,8 @@ body {
 
 .main {
   display: grid;
-  grid-template-columns: 20% 80%;
   grid-template-rows: 90vh 10vh;
+  grid-template-columns: 20% 80%;
   grid-template-areas:
     "left center center"
     "player player player";

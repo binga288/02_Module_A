@@ -14,10 +14,10 @@
             class="songPlay"
             style="width: 20px;object-fit:cover;"
             :src="require('@/assets/img/play.png')"
-            @click="$emit('searchPlay',song)"
+            @click="$emit(`songPlay`,song,`play`)"
           />
         </div>
-        <div class="songJoin text-left" style="font-size:35px;" @click="$emit('join',song)">+</div>
+        <div class="songJoin text-left" style="font-size:35px;" @click="$emit(`songPlay`,song,`join`)">+</div>
         <div>
           <span>{{ index+1 }}</span>
         </div>

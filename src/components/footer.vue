@@ -22,11 +22,11 @@
 
         <img
           v-if="!audio.playStatus"
-          @click="$emit('playBtn')"
+          @click="$emit(`playBtn`)"
           :src="require('@/assets/img/play.png')"
           alt
         />
-        <img v-else @click="$emit('playBtn')" :src="require('@/assets/img/pause.png')" alt />
+        <img v-else @click="$emit(`playBtn`)" :src="require('@/assets/img/pause.png')" alt />
 
         <img
           v-if="nextVerify"
@@ -45,7 +45,7 @@
     </div>
     <div class="footer-right d-flex justify-content-end align-items-center">
       <div class="lyrics"></div>
-      <div @click="$emit('songListShow')" class="listBtn" style="cursor:pointer;">
+      <div @click="$emit(`songListShow`)" class="listBtn" style="cursor:pointer;">
         <img :src="require('@/assets/img/playlist.png')" alt />
       </div>
       <div class="sound d-flex align-items-center">
@@ -108,10 +108,10 @@ export default {
   },
   methods: {
     soundCha(e) {
-      this.$emit("soundCha", e);
+      this.$emit("scheduleCha", e,"soundBar");
     },
     scheduleCha(e) {
-      this.$emit("scheduleCha", e);
+      this.$emit("scheduleCha", e,"playBar");
     },
     setSong(index) {
       if (this.nextVerify || this.prevVerify) {
@@ -144,7 +144,6 @@ export default {
             if (array != null) {
               var time = array[1].match(/(\d+:)+\d+,\d+/g);
               time = time[0].replace(",", ".").split(":");
-              console.log(array)
               this.audio.lyrics.push([
                 time[0] * 3600 + time[1] * 60 + time[2] * 1,
                 array.slice(2, array.length).join(" "),
@@ -168,6 +167,7 @@ export default {
       }
     },
   },
+  
 };
 </script>
 

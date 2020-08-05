@@ -14,12 +14,12 @@
         </div>
       </router-link>
     </div>
-    <canvas id="effect" v-show="playStatus"></canvas>
+    <div id="effect" class="d-flex align-items-end justify-content-center"></div>
   </div>
 </template>
 <style>
 #effect{
-  position: absolute;
+  height: 50vh;
 }
 .option {
   font-size: 25px;
@@ -35,23 +35,20 @@ a:hover,
 <script>
 export default {
   props:{
-    playStatus:{
-      type:Boolean
+    audio:{
+      type:Object
     }
   },
-  mounted() {
-    var main = document.querySelector(".effect");
-
+  mounted(){
+    var eff = document.getElementById("effect");
+    var width = eff.offsetWidth / 128 * 100;
     for (let i = 0; i < 100; i++) {
       var div = document.createElement("div");
-      div.style.transform = `translate(${Math.floor(
-        Math.random() * 20
-      )}vw,${Math.floor(Math.random() * 100)}vh)`;
-      div.style.background = `hsl(${Math.floor(Math.random() * 360)},100%,65%)`;
-      div.style.animationDuration = Math.random() * 2 + "s";
-      div.className = "partical";
-      main.appendChild(div);
+      div.style.width = `${width}px`;
+      div.style.height = "10px";
+      eff.appendChild(div);
     }
-  },
+    this.audio.audioEffect();
+  }
 };
 </script>

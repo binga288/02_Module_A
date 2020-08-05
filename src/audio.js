@@ -7,6 +7,7 @@ class MainPlayer {
     this.playlist = [];
     this.lyrics = [];
     this.lyric_index = 0;
+    this.context = new AudioContext()
   }
   setLyricIndex(index) {
     this.lyric_index = index;
@@ -14,11 +15,12 @@ class MainPlayer {
   }
   setSonglist(array) {
     this.playlist = array;
+    localStorage.setItem("list",array);
   }
-  requireTry(song){
+  requireTry(song) {
     try {
       require("@/assets/" + song.song_path);
-    }catch{
+    } catch{
       alert("無法讀取檔案");
       return true;
     }
@@ -26,7 +28,7 @@ class MainPlayer {
   }
   setCurrentAudio(index) {
     if (this.requireTry(this.playlist[index])) {
-      this.playlist.splice(index,1);
+      this.playlist.splice(index, 1);
       this.setCurrentAudio(index);
     }
     this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index].song_path));
@@ -35,12 +37,11 @@ class MainPlayer {
     this.playIndex = index;
     localStorage.setItem("playIndex", index);
     this.MainPlayer.load();
-    this.audioEffect();
-    return true;
   }
   play() {
     this.playStatus = true;
     this.MainPlayer.play();
+    this.context.resume();
   }
   stop() {
     this.playStatus = false;
@@ -53,11 +54,11 @@ class MainPlayer {
   getCurrentTime() {
     return this.MainPlayer.currentTime;
   }
+  getDurationTime(){
+    return this.MainPlayer.duration;
+  }
   setCurrentTime(number) {
     this.MainPlayer.currentTime = number;
-  }
-  getDuration() {
-    return this.MainPlayer.duration;
   }
   on(event, callback) {
     this.MainPlayer.addEventListener(event, callback);
@@ -72,33 +73,31 @@ class MainPlayer {
   getAudioInfo() {
     return this.MainPlayer;
   }
-  audioEffect(){
-    var context = new AudioContext();
-    var source = context.createMediaElementSource(this.MainPlayer);
-    var analyser = context.createAnalyser();
-
+  audioEffect() {
+    var divArray = document.querySelectorAll("#effect div");
+    var source = this.context.createMediaElementSource(this.MainPlayer);
+    var analyser = this.context.createAnalyser();
     source.connect(analyser);
-    analyser.connect(context.destination);
+    analyser.connect(this.context.destination);
 
+    analyser.fftSize = 256;
     var bufferLength = analyser.frequencyBinCount;
     var dataArray = new Uint8Array(bufferLength);
 
-    var bar_width = this.can.width / bufferLength;
-    function renderFrame(){
+    function renderFrame() {
       requestAnimationFrame(renderFrame);
-      var x = 0;
       analyser.getByteFrequencyData(dataArray);
-
-      for (var i = 0; i < bufferLength; i++) {
-        let bar_height = dataArray[i];
-        this.ctx.fillRect(x,this.can.height - bar_height,bar_width,bar_height);
-        x += bar_width + 1;        
-      }
+      divArray.forEach((i, k) => {
+        i.style.transform = `scale(1,${dataArray[k] * 0.09})`;
+        i.style.background = `rgb(${250 * (dataArray[k]/bufferLength * 1.2)},250,${50 * (k/bufferLength)})`;
+      })
     }
     renderFrame();
   }
 }
-function getAudio() {
+
+function getAudio(message) {
+  console.log(message)
   return new MainPlayer();
 }
 
