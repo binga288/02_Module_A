@@ -41,8 +41,8 @@ export default {
   },
   mounted(){
     var eff = document.getElementById("effect");
-    var width = eff.offsetWidth / 128 * 100;
-    for (let i = 0; i < 100; i++) {
+    var width = eff.offsetWidth / 80 * 100;
+    for (let i = 0; i < 80; i++) {
       var div = document.createElement("div");
       div.style.width = `${width}px`;
       div.style.height = "10px";

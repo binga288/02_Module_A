@@ -15,7 +15,7 @@ class MainPlayer {
   }
   setSonglist(array) {
     this.playlist = array;
-    localStorage.setItem("list",array);
+    localStorage.setItem("list",JSON.stringify(array));
   }
   requireTry(song) {
     try {
@@ -89,7 +89,7 @@ class MainPlayer {
       analyser.getByteFrequencyData(dataArray);
       divArray.forEach((i, k) => {
         i.style.transform = `scale(1,${dataArray[k] * 0.09})`;
-        i.style.background = `rgb(${250 * (dataArray[k]/bufferLength * 1.2)},250,${50 * (k/bufferLength)})`;
+        i.style.background = `hsl(120,90%,60%)`;
       })
     }
     renderFrame();

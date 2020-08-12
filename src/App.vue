@@ -79,6 +79,7 @@ export default {
           this.AudioPlayer.setCurrentAudio(index);
           this.AudioPlayer.play();
         }
+        this.AudioPlayer.audioEffect();
       });
       this.AudioPlayer.on("canplaythrough", () => {
         this.durationTime = this.AudioPlayer.getDurationTime();
@@ -132,7 +133,7 @@ export default {
     defaultPre(obj) {
       let index = localStorage.getItem("playIndex") | 0;
       this.AudioPlayer.setSonglist(obj);
-      this.AudioPlayer.setCurrentAudio(index);
+      this.AudioPlayer.setCurrentAudio(index);      
       this.defaultEvent();
     },
     playBtn() {
@@ -177,7 +178,7 @@ export default {
         if (!this.AudioPlayer.playing) {
           this.PrePlay();
         } else {
-          type != "join" ? this.setNextSong(this.playList.length - 1) : "";
+          type == "join" ? "" : this.setNextSong(this.playList.length - 1);
           localStorage.setItem("list", JSON.stringify(this.playList));
         }
       }
