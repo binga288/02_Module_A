@@ -1,89 +1,71 @@
 <template>
-  <div class="song-list text-white d-flex flex-column">
-    <div
-      class="song-bg"
-      v-for="(song, index) in playList"
-      :class="{'song-now':index == audio.playIndex}"
-      :key="song.title"
-    >
-      <div class="song px-4 py-3" @click="songPlay(index)">
+  <div class="wrapper text-white">
+    <div class="list_main">
+      <div
+        class="list_content px-5 py-4"
+        @click.stop="change(song.id)"
+        :class="{'now':song.id == AudioPlay.NowPlaying.id}"
+        v-for="(song,key) in AudioPlay.PlayList"
+        :key="song.id"
+      >
+        <div class="text-white">{{ key+1 }}</div>
         <div>
-          <span>{{ index+1 }}</span>
+          <div class="text-white">{{ song.title }}</div>
+          <div class="text-white-50">{{ song.artist }}</div>
         </div>
-        <div>
-          <div>{{ song.title }}</div>
-          <div class="text-white-50" style="font-size:14px;">{{ song.artist }}</div>
-        </div>
-        <div class="text-white-50 text-right">
-          <span>00:00</span>&emsp;
-        </div>
-        <div v-if="index != audio.playIndex" class="song-remove text-right" @click.stop="songRemove(index)">X</div>
+        <div class="text-white-50">{{ song.album_title }}</div>
+        <div class="text-white-50 text-right">00:00</div>
+        <div
+          @click.stop="remove(song.id)"
+          style="font-size:20px;font-weight:bold;"
+          v-if="song.id != AudioPlay.NowPlaying.id"
+          class="remove text-white text-right"
+        >X</div>
       </div>
     </div>
   </div>
 </template>
-
+<style scoped>
+.list_content {
+  display: grid;
+  grid-template-columns: 50px 2fr 1fr 50px 50px;
+  grid-column-gap: 5px;
+  cursor: pointer;
+}
+.list_content:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.remove:hover {
+  color: red !important;
+  cursor: pointer;
+}
+.now {
+  cursor: auto;
+  background: rgba(255, 255, 255, 0.2);
+}
+</style>
 <script>
 export default {
   props: {
-    playList: {
-      type: Array,
-    },
-    audio: {
-      type: Object,
-    },
+    AudioPlay: Object,
   },
   methods: {
-    songRemove(index) {
-      let old = this.playList[this.audio.playIndex];
-      this.playList.splice(index, 1);
-      this.audio.playlist = this.playList;
-      this.audio.playIndex = this.playList.findIndex((e) => e.title == old.title);
-      localStorage.setItem("playIndex", this.audio.playIndex);
-      localStorage.setItem("list", JSON.stringify(this.playList));
+    remove(id) {
+      this.AudioPlay.PlayList = this.AudioPlay.PlayList.filter(
+        (song) => song.id != id
+      );
+      this.AudioPlay.PlayIndex = this.AudioPlay.PlayList.findIndex(
+        (song) => song.id == this.AudioPlay.NowPlaying.id
+      );
     },
-    songPlay(index) {
-      if (this.audio.playIndex != index) {
-        this.$emit('setSong',index);
+    change(id) {
+      if (id != this.AudioPlay.NowPlaying.id) {
+        this.AudioPlay.setCurrentAudio(
+          this.AudioPlay.PlayList.findIndex((song) => song.id == id)
+        );
+        this.AudioPlay.play();
       }
     },
   },
 };
 </script>
-
-<style scoped>
-.song-list {
-  height: 90%;
-  width: 450px;
-  background: black;
-  z-index: 10;
-  overflow-y: scroll;
-}
-.song-bg {
-  width: 100%;
-  cursor: pointer;
-}
-.song-bg:hover {
-  transition: 0.5s;
-  background: rgba(255, 255, 255, 0.1);
-}
-.song-now {
-  background: rgba(255, 255, 255, 0.1);
-  cursor: auto;
-}
-.song-now div {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-.song {
-  display: grid;
-  grid-template-columns: 30px 1fr 1fr 30px;
-}
-.song-remove {
-  font-size: 20px;
-  cursor: pointer;
-}
-.song-remove:hover {
-  color: rgba(255, 0, 0, 0.6);
-  z-index: 100;
-}
-</style>

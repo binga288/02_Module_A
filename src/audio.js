@@ -1,104 +1,100 @@
-class MainPlayer {
-  constructor() {
-    this.MainPlayer = new Audio();
-    this.playStatus = false;
-    this.playing = false;
-    this.playIndex = 0;
-    this.playlist = [];
-    this.lyrics = [];
-    this.lyric_index = 0;
-    this.context = new AudioContext()
-  }
-  setLyricIndex(index) {
-    this.lyric_index = index;
-    localStorage.setItem("lyrics_index", index);
-  }
-  setSonglist(array) {
-    this.playlist = array;
-    localStorage.setItem("list",JSON.stringify(array));
-  }
-  requireTry(song) {
-    try {
-      require("@/assets/" + song.song_path);
-    } catch{
-      alert("無法讀取檔案");
-      return true;
+class AudioPlay {
+    constructor() {
+        this.Audio = new Audio();
+        this.PlayIndex = null;
+        this.PlayList = [];
+        this.Played = false;
+        this.Playing = false;
+        this.NowPlaying = {};
+        this.listShow = false;
     }
-    return false;
-  }
-  setCurrentAudio(index) {
-    if (this.requireTry(this.playlist[index])) {
-      this.playlist.splice(index, 1);
-      this.setCurrentAudio(index);
+    reset() {
+        this.pause();
+        this.PlayIndex = null;
+        this.PlayList = [];
+        this.NowPlaying = {};
+        localStorage.clear();
+        localStorage.setItem("volume",this.Audio.volume);
     }
-    this.MainPlayer.setAttribute("src", require("@/assets/" + this.playlist[index].song_path));
-    this.lyrics = [];
-    this.playing = true;
-    this.playIndex = index;
-    localStorage.setItem("playIndex", index);
-    this.MainPlayer.load();
-  }
-  play() {
-    this.playStatus = true;
-    this.MainPlayer.play();
-    this.context.resume();
-  }
-  stop() {
-    this.playStatus = false;
-    this.MainPlayer.pause()
-  }
-  chaSound(number) {
-    this.MainPlayer.volume = number
-    localStorage.setItem("sound", number);
-  }
-  getCurrentTime() {
-    return this.MainPlayer.currentTime;
-  }
-  getDurationTime(){
-    return this.MainPlayer.duration;
-  }
-  setCurrentTime(number) {
-    this.MainPlayer.currentTime = number;
-  }
-  on(event, callback) {
-    this.MainPlayer.addEventListener(event, callback);
-  }
-  formatTime(sec = this) {
-    let hour = Math.floor(sec / 3600).toString().padStart(2, 0);
-    let minute = Math.floor(sec % 3600 / 60).toString().padStart(2, 0);
-    let second = Math.floor(sec % 3600 % 60).toString().padStart(2, 0);
-
-    return (hour > 0) ? `${hour}:${minute}:${second}` : `${minute}:${second}`
-  }
-  getAudioInfo() {
-    return this.MainPlayer;
-  }
-  audioEffect() {
-    var divArray = document.querySelectorAll("#effect div");
-    var source = this.context.createMediaElementSource(this.MainPlayer);
-    var analyser = this.context.createAnalyser();
-    source.connect(analyser);
-    analyser.connect(this.context.destination);
-
-    analyser.fftSize = 256;
-    var bufferLength = analyser.frequencyBinCount;
-    var dataArray = new Uint8Array(bufferLength);
-
-    function renderFrame() {
-      requestAnimationFrame(renderFrame);
-      analyser.getByteFrequencyData(dataArray);
-      divArray.forEach((i, k) => {
-        i.style.transform = `scale(1,${dataArray[k] * 0.09})`;
-        i.style.background = `hsl(120,90%,60%)`;
-      })
+    play() {
+        if (this.Played) {
+            this.Audio.play();
+            this.Playing = true;
+        }
     }
-    renderFrame();
-  }
+    pause() {
+        if (this.Played) {
+            this.Audio.pause();
+            this.Playing = false;
+        }
+    }
+    setCurrentAudio(index) {
+        this.Played = true;
+        this.PlayIndex = index;
+        this.NowPlaying = this.PlayList[index];
+        this.Audio.setAttribute("src", require(`@/assets/${this.NowPlaying.song_path}`));
+        this.Audio.load();
+        this.Played = true;
+        localStorage.setItem("played", this.Played);
+    }
+    setPlayList(array) {
+        this.PlayList = array;
+    }
+    addPlayList(song) {
+        this.PlayList.push(song);
+    }
+    setCurrentTime(precent) {
+        this.Audio.currentTime = this.Audio.duration * precent;
+        localStorage.setItem("current", this.Audio.currentTime);
+    }
+    setVolume(level) {
+        this.Audio.volume = level;
+        localStorage.setItem("volume", level);
+    }
+    defaultEvent() {
+        let bars = document.querySelectorAll(".progress-bar");
+        this.Audio.ondurationchange = function () {
+            localStorage.setItem("duration", this.Audio.duration);
+            window.navigator.mediaSession.metadata = new window.MediaMetadata({
+                title: this.NowPlaying.title,
+                artist: this.NowPlaying.album_artist,
+                album: this.NowPlaying.album_title,
+                artwork: [{
+                    src: require(`@/assets/${this.NowPlaying.album_img}`),
+                    sizes: '180x180'
+                }]
+            });
+        }.bind(this);
+        this.Audio.ontimeupdate = function () {
+            bars[0].style.width = `${(this.currentTime / this.duration) * 100}%`;
+            localStorage.setItem("current", this.currentTime);
+        };
+        this.Audio.onended = function () {
+            if (this.PlayIndex + 1 < this.PlayList.length) {
+                this.setCurrentAudio(this.PlayIndex + 1);
+                this.play();
+            } else {
+                this.setCurrentAudio(0);
+                this.pause();
+            }
+        }.bind(this);
+
+        let Played = localStorage.getItem("played");
+        if (JSON.parse(Played)) {
+            let sound = localStorage.getItem("volume");
+            let current = localStorage.getItem("current");
+            let duration = localStorage.getItem("duration");
+            let PlayIndex = localStorage.getItem("playindex");
+            let PlayList = localStorage.getItem("playlist");
+
+            this.setPlayList(JSON.parse(PlayList));
+            this.setCurrentAudio(PlayIndex*1);
+            this.Audio.volume = sound;
+            this.Audio.currentTime = current?current:0;
+            bars[0].style.width = current / duration * 100 + "%";
+            bars[1].style.width = this.Audio.volume * 100 + "%";
+        }
+    }
 }
 
-function getAudio(message) {
-  console.log(message)
-  return new MainPlayer();
-}
-
-export default getAudio;
+export default AudioPlay;
