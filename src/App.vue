@@ -1,51 +1,57 @@
 <template>
   <div id="app">
-    <div class="control">
-      <Control />
+    <div class="left">
+      <Control  :AudioPlay="AudioPlay"/>
     </div>
     <div class="center">
-      <transition name="fade" mode="out-in">
-        <router-view :AudioPlay="AudioPlay" />
-      </transition>
+      <router-view :AudioPlay="AudioPlay"></router-view>
     </div>
-    <div class="right" v-if="AudioPlay.listShow">
-      <SongList :AudioPlay="AudioPlay" />
+    <div class="right" v-if="AudioPlay.ListShow">
+      <PlayList :AudioPlay="AudioPlay"/>
     </div>
     <div class="player">
       <Footer :AudioPlay="AudioPlay" />
     </div>
   </div>
 </template>
+
 <script>
 import Control from "@/components/control.vue";
 import Footer from "@/components/footer.vue";
 import AudioPlay from "@/audio.js";
-import SongList from "@/components/PlayList.vue";
+import PlayList from "@/components/list.vue";
 export default {
+  name: "App",
   components: {
     Control,
     Footer,
-    SongList,
+    PlayList
   },
   data() {
     return {
-      AudioPlay: new AudioPlay()
+      AudioPlay: new AudioPlay(),
     };
   },
   computed: {
-    PlayList: function () {
-      return this.AudioPlay.PlayList;
+    Played: function () {
+      return this.AudioPlay.Played;
     },
     PlayIndex: function () {
       return this.AudioPlay.PlayIndex;
     },
+    PlayList: function () {
+      return this.AudioPlay.PlayList;
+    }
   },
   watch: {
-    PlayList: function () {
-      localStorage.setItem("playlist", JSON.stringify(this.PlayList));
+    Played: function () {
+      localStorage.setItem("played", this.Played);
     },
     PlayIndex: function () {
-      localStorage.setItem("playindex", JSON.stringify(this.PlayIndex));
+      localStorage.setItem("playindex", this.PlayIndex);
+    },
+    PlayList: function () {
+      localStorage.setItem("playlist", JSON.stringify(this.PlayList));
     },
   },
   mounted() {
@@ -53,50 +59,43 @@ export default {
   },
 };
 </script>
+
 <style>
 body {
   margin: 0;
   padding: 0;
 }
 * {
-  font-family: "微軟正黑體";
-  user-select: none;
   text-decoration: none !important;
+  font-family: "微軟正黑體" !important;;
+  user-select: none;
 }
 #app {
   display: grid;
   grid-template-columns: 20vw 50vw 30vw;
   grid-template-rows: 90vh 10vh;
   grid-template-areas:
-    "control center right"
+    "left center right"
     "player player player";
 }
-.control {
-  grid-area: control;
+.left {
+  grid-area: left;
   background: black;
 }
 .center {
   grid-area: center;
   background: #111;
-  overflow-y: scroll;
   grid-column-end: span 2;
-}
-.right {
-  grid-area: right;
-  background: rgba(0, 0, 0, 0.7);
   overflow-y: scroll;
-  z-index: 3;
 }
 .player {
   grid-area: player;
   background: #1d1d1d;
 }
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: 0.1s;
+.right {
+  grid-area: right;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+  overflow-y: scroll;
 }
 </style>

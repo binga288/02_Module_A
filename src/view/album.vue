@@ -1,45 +1,51 @@
 <template>
   <div class="wrapper">
-    <router-link :to="{name:'album_content',params:{id:album.id}}" class="album_main d-flex align-items-center p-4" v-for="album in Albums" :key="album.id">
-      <div class="album_img">
-        <img :src="require(`@/assets/${album.img_path}`)" alt />
-      </div>
-      <div class="album_content ml-4" style="width:60%;">
-        <h4 class="text-white">{{album.title}}</h4>
-        <br />
-        <div class="album_des text-white-50 text-truncate">{{ album.description }}</div>
-      </div>
-    </router-link>
+    <div
+      v-for="album in albums"
+      :key="album.id"
+    >
+      <router-link :to="{name:'album',params:{album_id:album.id}}" class="album_main py-4 px-4 d-flex align-items-center">
+        <img
+          :src="require(`@/assets/${album.img_path}`)"
+          style="height:130px;width:130px;object-fit:cover;"
+          alt
+        />
+        <div class="content ml-4">
+          <div class="d-flex align-items-center">
+            <h4 class="text-white">{{album.title}}</h4>
+            <div class="text-white-50 ml-3 text-truncate">{{album.artist}}</div>
+          </div>
+          <br />
+          <div class="text-white-50 text-truncate">{{album.description}}</div>
+        </div>
+      </router-link>
+    </div>
   </div>
 </template>
 <script>
 export default {
   props: {
-    Albums: {
-      type:Array,
-    },
+    albums: Array,
   },
-  mounted: function () {
-    console.log(this.Albums);
+  mounted() {
+    console.log(this.albums);
   },
 };
 </script>
 <style scoped>
 .wrapper {
-  max-width: 70vw;
-  margin: 30px auto;
   display: grid;
+  margin: 40px auto;
+  max-width: 90%;
   grid-template-columns: 50% 50%;
-  grid-column-gap: 40px;
-  grid-row-gap: 30px;  
+  grid-row-gap: 30px;
+  grid-column-gap: 30px;
 }
 .album_main {
   background: #1d1d1d;
-  border-radius: 10px;  
+  border-radius: 20px;
 }
-.album_img img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
+.content {
+  width: 70%;
 }
 </style>
