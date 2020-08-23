@@ -1,140 +1,138 @@
 <template>
   <div>
-    <input
-      type="text"
-      v-model="keyword"
-      class="form-control ml-3 mt-3 px-3 rounded-pill"
-      style="width:300px;"
-      placeholder="輸入關鍵字"
-    />
-    <div class="content my-3 ml-4">
-      <div class="song_main px-5 py-4" v-for="(result,key) in searchResult" :key="result[0].id">
-        <img @click="play(result[0])" class="ui" :src="require(`@/assets/img/play.png`)" alt />
-        <div
-          @click="join(result[0])"
-          class="text-white pb-2 ui"
-          style="font-size:50px;font-weight:bold;"
-        >+</div>
-        <div class="text-white" style="font-size:20px;font-weight:bold;">{{ key+1 }}</div>
-        <div
-          class="text-white"
-          :class="{'searched':result[1].indexOf('title') != -1}"
-        >{{result[0].title}}</div>
-        <div
-          class="text-white-50"
-          :class="{'searched':result[1].indexOf('album') != -1}"
-        >{{ result[0].album_title }}</div>
-        <div
-          class="text-white-50"
-          :class="{'searched':result[1].indexOf('artist') != -1}"
-        >{{ result[0].artist }}</div>
-        <div
-          class="text-white-50"
-          :class="{'searched':result[1].indexOf('composer') != -1}"
-        >{{ result[0].composer }}</div>
-        <div class="text-white-50">00:00</div>
-      </div>
+    <div class="d-flex ml-3 mt-4 align-items-center">
+      <input
+        type="text"
+        v-model="searchWord"
+        class="form-control px-3 rounded-pill"
+        style="width:400px;"
+        placeholder="輸入關鍵字"
+      />
+      <span class="text-white ml-3" v-if="count">共 {{count}} 歌曲</span>
+    </div>
+    <div class="songlist px-5 py-3" v-for="(song,key) in searchResult" :key="song.id">
+      <img @click="play(song[0])" class="ui mt-2" :src="require(`@/assets/img/play.png`)" alt />
+      <div @click="join(song[0])" class="ui text-white" style="font-size:50px;">+</div>
+      <div class="text-white text-center" style="font-size:20px;">{{ key+1 }}</div>
+      <div
+        :class="{'searched': song[1].indexOf(`title`) != -1}"
+        class="text-white"
+      >{{ song[0].title }}</div>
+      <div
+        :class="{'searched': song[1].indexOf(`artist`) != -1}"
+        class="text-white-50"
+      >{{ song[0].artist }}</div>
+      <div
+        :class="{'searched': song[1].indexOf(`composer`) != -1}"
+        class="text-white-50"
+      >{{ song[0].composer }}</div>
+      <div
+        :class="{'searched': song[1].indexOf(`album`) != -1}"
+        class="text-white-50"
+      >{{ song[0].album_title }}</div>
+      <div class="text-white-50">{{ AudioPlayer.formatDate(song[0].duration) }}</div>
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    albums: Array,
-    AudioPlay: Object,
-  },
-  data() {
-    return {
-      keyword: "",
-      searchList: [],
-      searchResult: [],
-    };
-  },
-  watch: {
-    keyword: function (str) {
-      this.searchList = [];
-      this.searchResult = [];
-      let result = [];
-      let normal = str.match(/(title|composer|artist|album):(\w){3,}/g);
-      let hard = str.match(/(title|composer|artist|album):"(\w|.){3,}"/g);
-      if (normal != null || hard != null) {
-        result = result.concat(normal, hard);
-        result = result.filter((x) => x);
-        result.forEach((e) => {
-          let split = e.split(":");
-          this.searchList.push([split[0], split[1].replace(/"/, "")]);
-        });
-      }
-      this.getResult(this.searchList, this.albums);
-      console.log(this.searchResult)
-    },
-  },
-  methods: {
-    getResult(searchList, data) {
-      data.forEach((album) => {
-        album.songlist.forEach((song) => {
-          let verify = false;
-          let fix = [];
-          searchList.forEach((search) => {
-            if (search[0] == "album") {
-              if (album.title.toLocaleLowerCase().indexOf(search[1]) != -1) {
-                verify = true;
-                fix.push(search[0]);
-              }
-            } else if (search[0] == "artist") {
-              if (album.artist.toLocaleLowerCase().indexOf(search[1]) != -1) {
-                verify = true;
-                fix.push(search[0]);
-              }
-            } else {
-              if (song[search[0]].toLocaleLowerCase().indexOf(search[1]) != -1) {
-                verify = true;
-                fix.push(search[0]);
-              }
-            }
-          });          
-          if(verify)this.searchResult.push([song,fix]);
-        });
-      });
-    },
-    join(song) {
-      if (this.AudioPlay.PlayList.findIndex((e) => e.id == song.id) == -1) {
-        this.AudioPlay.AddPlayList(song);
-        this.AudioPlay.SetCurrentAudio(this.AudioPlay.PlayList.length - 1);
-        this.AudioPlay.play();
-      } else {
-        alert("歌曲已存在");
-      }
-      this.AudioPlay.ListShow = true;
-    },
-    play(song) {
-      if (this.AudioPlay.PlayList.findIndex((e) => e.id == song.id) == -1) {
-        this.AudioPlay.AddPlayList(song);
-        this.AudioPlay.SetCurrentAudio(this.AudioPlay.PlayList.length - 1);
-        this.AudioPlay.play();
-      } else {
-        this.AudioPlay.SetCurrentAudio(
-          this.AudioPlay.PlayList.findIndex((e) => e.id == song.id)
-        );
-        this.AudioPlay.play();
-      }
-      this.AudioPlay.ListShow = true;
-    },
-  },
-};
-</script>
 <style scoped>
-.song_main {
+.songlist {
   display: grid;
-  grid-template-columns: repeat(3, 50px) 5fr repeat(4, 1fr);
+  grid-template-columns: repeat(3, 50px) 4fr repeat(4, 1fr);
   align-items: center;
-  grid-gap: 10px;
-}
-.ui:hover {
-  cursor: pointer;
-  opacity: 0.5;
+  grid-column-gap: 10px;
 }
 .searched {
   color: green !important;
 }
+.ui:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
 </style>
+<script>
+export default {
+  props: {
+    albums: Array,
+    AudioPlayer: Object,
+  },
+  data() {
+    return {
+      searchWord: "",
+      searchResult: [],
+      searchKey: [],
+    };
+  },
+  computed: {
+    count: function () {
+      return this.searchResult.length;
+    },
+  },
+  watch: {
+    searchWord: function (str) {
+      this.searchKey = [];
+      this.searchResult = [];
+      let normal = str.match(/(title|composer|artist|album):\w{3,}/g);
+      let hard = str.match(/(title|composer|artist|album):"(\w|.){3,}"/g);
+      let searchArray = [];
+      if (normal != null || hard != null) {
+        searchArray = searchArray.concat(normal, hard);
+        searchArray = searchArray.filter((x) => x);
+        searchArray.forEach((x) => {
+          let array = x.split(":");
+          array[1] = array[1].replace(/"/g, "");
+          this.searchKey.push(array);
+        });
+      }
+      this.result();
+    },
+  },
+  methods: {
+    result() {
+      this.albums.forEach((album) => {
+        album.songlist.forEach((song) => {
+          let key_array = [];
+          let verify = false;
+          this.searchKey.forEach((key) => {
+            console.log(song.album_title)
+            if (
+              key[0] == "album" &&
+              song.album_title.toLocaleLowerCase().indexOf(key[1].toLocaleLowerCase()) != -1
+            ) {
+              key_array.push(key[0]);
+              verify = true;
+            }
+            if (song[key[0]].toLocaleLowerCase().indexOf(key[1].toLocaleLowerCase()) != -1) {
+              key_array.push(key[0]);
+              verify = true;
+            }
+          });
+          if (verify) this.searchResult.push([song, key_array]);
+        });
+      });
+    },
+    play(song) {
+      let result = this.AudioPlayer.playList.findIndex((x) => x.id == song.id);
+      if (result != -1) {
+        this.AudioPlayer.setCurrentAudio(result);
+        this.AudioPlayer.play();
+      } else {
+        this.AudioPlayer.addPlayList(song);
+        this.AudioPlayer.setCurrentAudio(this.AudioPlayer.playList.length - 1);
+        this.AudioPlayer.play();
+      }
+      this.AudioPlayer.listShow = true;
+    },
+    join(song) {
+      let result = this.AudioPlayer.playList.findIndex((x) => x.id == song.id);
+      if (result != -1) {
+        alert("歌曲已在播放清單");
+      } else {
+        this.AudioPlayer.addPlayList(song);
+        this.AudioPlayer.setCurrentAudio(this.AudioPlayer.playList.length - 1);
+        this.AudioPlayer.play();
+      }
+      this.AudioPlayer.listShow = true;
+    },
+  },
+};
+</script>

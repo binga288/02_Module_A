@@ -1,16 +1,16 @@
 <template>
   <div id="app">
     <div class="left">
-      <Control  :AudioPlay="AudioPlay"/>
+      <Control :AudioPlayer="AudioPlayer" />
     </div>
     <div class="center">
-      <router-view :AudioPlay="AudioPlay"></router-view>
+      <router-view :AudioPlayer="AudioPlayer"></router-view>
     </div>
-    <div class="right" v-if="AudioPlay.ListShow">
-      <PlayList :AudioPlay="AudioPlay"/>
+    <div class="right" v-if="AudioPlayer.listShow">
+      <Playlist :AudioPlayer="AudioPlayer"/>
     </div>
     <div class="player">
-      <Footer :AudioPlay="AudioPlay" />
+      <Footer :AudioPlayer="AudioPlayer" />
     </div>
   </div>
 </template>
@@ -18,84 +18,138 @@
 <script>
 import Control from "@/components/control.vue";
 import Footer from "@/components/footer.vue";
-import AudioPlay from "@/audio.js";
-import PlayList from "@/components/list.vue";
+import Playlist from "@/components/playlist.vue";
+import AudioPlayer from "@/audio.js";
+
 export default {
   name: "App",
-  components: {
-    Control,
-    Footer,
-    PlayList
-  },
   data() {
     return {
-      AudioPlay: new AudioPlay(),
+      AudioPlayer: new AudioPlayer(),
     };
   },
   computed: {
-    Played: function () {
-      return this.AudioPlay.Played;
+    playIndex: function () {
+      return this.AudioPlayer.playIndex;
     },
-    PlayIndex: function () {
-      return this.AudioPlay.PlayIndex;
+    playList: function () {
+      return this.AudioPlayer.playList;
     },
-    PlayList: function () {
-      return this.AudioPlay.PlayList;
-    }
+    played: function () {
+      return this.AudioPlayer.played;
+    },
+    nowPlay: function () {
+      return this.AudioPlayer.nowPlay;
+    },
   },
   watch: {
-    Played: function () {
-      localStorage.setItem("played", this.Played);
+    playList: function () {
+      localStorage.setItem("playList", JSON.stringify(this.playList));
     },
-    PlayIndex: function () {
-      localStorage.setItem("playindex", this.PlayIndex);
+    playIndex: function () {
+      localStorage.setItem("playIndex", this.playIndex);
     },
-    PlayList: function () {
-      localStorage.setItem("playlist", JSON.stringify(this.PlayList));
+    played: function () {
+      localStorage.setItem("played", this.played);
+    },
+    nowPlay: function () {
+      window.navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: this.nowPlay.title,
+        artist: this.nowPlay.artist,
+        album: this.nowPlay.album_title,
+        artwork: [
+          {
+            src: require(`@/assets/${this.nowPlay.img_path}`),
+            sizes: "360x180",
+          },
+        ],
+      });
     },
   },
+  components: {
+    Control,
+    Footer,
+    Playlist,
+  },
   mounted() {
-    this.AudioPlay.defaultEvent();
+    this.AudioPlayer.defauleEvent();
+    window.navigator.mediaSession.setActionHandler(
+      "play",
+      function () {
+        this.AudioPlayer.play();
+      }.bind(this)
+    );
+    window.navigator.mediaSession.setActionHandler(
+      "pause",
+      function () {
+        this.AudioPlayer.pause();
+      }.bind(this)
+    );
+    window.navigator.mediaSession.setActionHandler(
+      "nexttrack",
+      function () {
+        if (this.playIndex + 1 < this.playList.length)
+          this.AudioPlayer.setCurrentAudio(this.playIndex + 1);
+          this.AudioPlayer.play();
+      }.bind(this)
+    );
+    window.navigator.mediaSession.setActionHandler(
+      "previoustrack",
+      function () {
+        if (this.playIndex - 1 >= 0)
+          this.AudioPlayer.setCurrentAudio(this.playIndex - 1);
+          this.AudioPlayer.play();
+      }.bind(this)
+    );
+    window.addEventListener("keypress",function(e){
+      if(e.code == "Space"){
+        if(this.AudioPlayer.playing){
+          this.AudioPlayer.pause();
+        }else{
+          this.AudioPlayer.play();
+        }
+      }
+    }.bind(this));
   },
 };
 </script>
 
 <style>
+* {
+  text-decoration: none !important;
+  user-select: none;
+}
 body {
   margin: 0;
   padding: 0;
 }
-* {
-  text-decoration: none !important;
-  font-family: "微軟正黑體" !important;;
-  user-select: none;
-}
 #app {
+  font-family: "微軟正黑體";
   display: grid;
-  grid-template-columns: 20vw 50vw 30vw;
+  grid-template-columns: 20vw 45vw 35vw;
   grid-template-rows: 90vh 10vh;
   grid-template-areas:
     "left center right"
     "player player player";
 }
 .left {
-  grid-area: left;
   background: black;
+  grid-area: "left";
 }
 .center {
-  grid-area: center;
   background: #111;
+  grid-area: center;
   grid-column-end: span 2;
   overflow-y: scroll;
 }
-.player {
-  grid-area: player;
-  background: #1d1d1d;
-}
 .right {
+  background: rgba(0, 0, 0, 0.5);
   grid-area: right;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 10;
+  z-index: 99;
   overflow-y: scroll;
+}
+.player {
+  background: #1d1d1d;
+  grid-area: player;
 }
 </style>

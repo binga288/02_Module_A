@@ -1,22 +1,15 @@
 <template>
-  <div class="wrapper">
-    <div
-      v-for="album in albums"
-      :key="album.id"
-    >
-      <router-link :to="{name:'album',params:{album_id:album.id}}" class="album_main py-4 px-4 d-flex align-items-center">
-        <img
-          :src="require(`@/assets/${album.img_path}`)"
-          style="height:130px;width:130px;object-fit:cover;"
-          alt
-        />
-        <div class="content ml-4">
-          <div class="d-flex align-items-center">
-            <h4 class="text-white">{{album.title}}</h4>
-            <div class="text-white-50 ml-3 text-truncate">{{album.artist}}</div>
-          </div>
+  <div class="d-flex justify-content-center my-5">
+    <div class="wrapper">
+      <router-link class="album p-4 d-flex align-items-center" v-for="(album,key) in albums" :key="key" :to="{name:'album_content',params:{id:album.id}}">
+        <img :src="require(`@/assets/${album.img_path}`)" alt />
+        <div class="ml-4" style="width: 70%;">
+          <h3 class="text-white">{{album.title}}</h3>
           <br />
-          <div class="text-white-50 text-truncate">{{album.description}}</div>
+          <div class="text-white-50 text-truncate mb-3">{{ album.description }}</div>
+          <div class="text-white-50 d-flex justify-content-between">
+            <span>演唱者：{{ album.artist }}</span>
+          </div>
         </div>
       </router-link>
     </div>
@@ -27,25 +20,22 @@ export default {
   props: {
     albums: Array,
   },
-  mounted() {
-    console.log(this.albums);
-  },
 };
 </script>
 <style scoped>
 .wrapper {
+  width: 90%;
   display: grid;
-  margin: 40px auto;
-  max-width: 90%;
   grid-template-columns: 50% 50%;
-  grid-row-gap: 30px;
-  grid-column-gap: 30px;
+  grid-gap: 20px;
 }
-.album_main {
+.album {
   background: #1d1d1d;
-  border-radius: 20px;
+  border-radius: 10px;
 }
-.content {
-  width: 70%;
+.album img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
 }
 </style>

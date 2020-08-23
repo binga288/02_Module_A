@@ -1,3 +1,4 @@
 module.exports = {
-  publicPath:'/02_Module_A/'
-}
+    publicPath:"/02_Module_A/"
+  }
+  

@@ -1,20 +1,20 @@
-import vue from "vue";
+import Vue from "vue";
 import VueRouter from "vue-router";
 import album from "@/view/album.vue";
-import search from "@/view/search.vue";
 import album_content from "@/view/album_content.vue";
+import search from "@/view/search.vue";
 
-vue.use(VueRouter);
+Vue.use(VueRouter);
 
 export default new VueRouter({
-    base:"/02_Module_A/",
     mode:"history",
+    base:"/02_Module_A",
     routes:[
         {
-            name:"home",
             path:"/",
-            props:true,
+            name:"home",
             component:album,
+            props:true,
             beforeEnter(to,from,next){
                 fetch("http://web02/00_Module_A_API/api/albums")
                 .then(res=>res.json())
@@ -22,21 +22,20 @@ export default new VueRouter({
                     res.forEach(album=>{
                         album.songlist.forEach(song=>{
                             song.album_title = album.title;
-                            song.album_img = album.img_path;
-                            song.album_artist = album.artist;
+                            song.img_path = album.img_path;
                         })
                     })
                     to.params.albums = res;
-                    
+                    console.log(res);
                     next();
-                })                
+                })
             }
         },
         {
-            name:"search",
             path:"/search",
-            props:true,
+            name:"search",
             component:search,
+            props:true,
             beforeEnter(to,from,next){
                 fetch("http://web02/00_Module_A_API/api/albums")
                 .then(res=>res.json())
@@ -44,21 +43,20 @@ export default new VueRouter({
                     res.forEach(album=>{
                         album.songlist.forEach(song=>{
                             song.album_title = album.title;
-                            song.album_img = album.img_path;
-                            song.album_artist = album.artist;
+                            song.img_path = album.img_path;
                         })
                     })
                     to.params.albums = res;
-                    
+                    console.log(res);
                     next();
-                })                
+                })
             }
         },
         {
-            name:"album",
-            path:"/album/:album_id",
-            props:true,
+            path:"/album/:id",
+            name:"album_content",
             component:album_content,
+            props:true,
             beforeEnter(to,from,next){
                 fetch("http://web02/00_Module_A_API/api/albums")
                 .then(res=>res.json())
@@ -66,14 +64,13 @@ export default new VueRouter({
                     res.forEach(album=>{
                         album.songlist.forEach(song=>{
                             song.album_title = album.title;
-                            song.album_img = album.img_path;
-                            song.album_artist = album.artist;
+                            song.img_path = album.img_path;
                         })
                     })
                     to.params.albums = res;
-                    
+                    console.log(res);
                     next();
-                })                
+                })
             }
         }
     ]

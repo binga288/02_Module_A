@@ -1,63 +1,64 @@
 <template>
-  <div class="wrapper">
-    <div class="d-flex ml-3 align-items-center">
+  <div class="wrapper mx-4">
+    <div class="d-flex">
       <img
-        v-if="img_exist"
-        :src="require(`@/assets/${AudioPlay.NowPlay.album_img}`)"
-        style="width:80px;height:80px;object-fit:cover;"
-        alt
+        v-if="AudioPlayer.nowPlay.img_path"
+        style="width:90px;height:80px;object-fit:cover;"
+        :src="require(`@/assets/${AudioPlayer.nowPlay.img_path}`)"
       />
-      <div class=" ml-3">
-        <span class="text-white" style="font-size:17px;">{{ AudioPlay.NowPlay.title }}</span>
-        <span class="text-white-50 ml-2">{{ AudioPlay.NowPlay.album_artist }}</span>
-      <div class="text-white-50" v-if="AudioPlay.LyricResult[AudioPlay.LyricIndex]">{{ AudioPlay.LyricResult[AudioPlay.LyricIndex][1] }}</div>
+      <div class="ml-3 d-flex align-items-center">
+        <span class="text-white">{{AudioPlayer.nowPlay.title}}</span>
+        <span class="text-white-50 ml-1" style="font-size:15px;">{{AudioPlayer.nowPlay.artist}}</span>
       </div>
     </div>
-    <div>
-      <div class="text-center mb-3">
+    <div class="d-flex flex-column">
+      <div class="ui d-flex justify-content-center mb-3">
         <img
+          :class="{'disabled':AudioPlayer.playIndex - 1 < 0}"
           @click="chaAudio(-1)"
           :src="require(`@/assets/img/prev.png`)"
-          style="cursor:pointer;"
-          :class="{'disable':AudioPlay.PlayIndex - 1 < 0}"
-        />
-        <img
-          @click="chaPlay()"
-          :src="AudioPlay.Playing?require(`@/assets/img/pause.png`):require(`@/assets/img/play.png`)"
-          style="cursor:pointer;"
-          class="mx-5"
           alt
         />
         <img
-          @click="chaAudio(+1)"
+          v-if="!AudioPlayer.playing"
+          @click="play()"
+          class="mx-5"
+          :src="require(`@/assets/img/play.png`)"
+          alt
+        />
+        <img v-else @click="pause()" class="mx-5" :src="require(`@/assets/img/pause.png`)" alt />
+        <img
+          :class="{'disabled':AudioPlayer.playIndex + 1 >= AudioPlayer.playList.length}"
+          @click="chaAudio(1)"
           :src="require(`@/assets/img/next.png`)"
-          style="cursor:pointer;"
-          :class="{'disable':AudioPlay.PlayIndex + 1 >= AudioPlay.PlayList.length}"
+          alt
         />
       </div>
-      <div class="progress" @click.stop="chaPlayBar($event)" style="height:7px;cursor:pointer;">
-        <div class="progress-bar bg-success" style="width:0%;pointer-events:none;"></div>
+      <div class="d-flex align-items-center">
+        <div
+          @click="chaPlaybar($event)"
+          class="progress"
+          style="height:8px;cursor:pointer;width:100%;"
+        >
+          <div class="progress-bar bg-success" style="width:0%;pointer-events: none;"></div>
+        </div>
+        <div class="text-white ml-2" id="time"></div>
       </div>
     </div>
-    <div class="d-flex mr-4 justify-content-end align-items-center">
+    <div class="d-flex justify-content-end align-items-center">
       <img
-        @click="AudioPlay.ListShow = !AudioPlay.ListShow"
-        :src="require(`@/assets/img/list.png`)"
-        style="width:30px;height:30px;object-fit:cover;cursor:pointer;"
+        style="height:30px;cursor:pointer;"
+        @click="showList()"
+        :src="require(`@/assets/img/playlist.png`)"
         alt
       />
-      <img
-        :src="require(`@/assets/img/sound.png`)"
-        style="width:40px;height:40px;object-fit:cover;cursor:pointer;"
-        class="mx-3"
-        alt
-      />
+      <img :src="require(`@/assets/img/sound.png`)" class="mx-4" alt />
       <div
         class="progress"
-        @click.stop="chaSoundBar($event)"
-        style="width:35%;height:7px;cursor:pointer;"
+        @click="chaSoundbar($event)"
+        style="height:8px;cursor:pointer;width:35%;"
       >
-        <div class="progress-bar bg-success" style="width:1%;pointer-events:none;"></div>
+        <div class="progress-bar bg-success" style="width:0%;pointer-events: none;"></div>
       </div>
     </div>
   </div>
@@ -65,47 +66,42 @@
 <script>
 export default {
   props: {
-    AudioPlay: Object,
+    AudioPlayer: Object,
   },
   computed: {
-    img_exist: function () {
-      return this.AudioPlay.NowPlay.album_img;
-    }
+    duration: function () {
+      return this.AudioPlayer.nowPlay.duration
+        ? this.AudioPlayer.formatDate(this.AudioPlayer.nowPlay.duration)
+        : "00:00";
+    },
   },
-  data() {
-    return {
-      LyricResult: [],
-      LyricIndex: 0,
-    };
-  },
-
   methods: {
-    chaPlayBar(e) {
+    chaPlaybar(e) {
       let schadule = e.offsetX / e.target.offsetWidth;
       e.target.children[0].style.width = schadule * 100 + "%";
-      this.AudioPlay.chaCurrentTime(schadule);
+      this.AudioPlayer.chaCurrentTime(schadule);
     },
-    chaSoundBar(e) {
+    chaSoundbar(e) {
       let schadule = e.offsetX / e.target.offsetWidth;
       e.target.children[0].style.width = schadule * 100 + "%";
-      this.AudioPlay.chaSound(schadule);
+      this.AudioPlayer.chaSound(schadule);
     },
-    chaPlay() {
-      if (this.AudioPlay.Playing) {
-        this.AudioPlay.pause();
-      } else {
-        this.AudioPlay.play();
+    pause() {
+      this.AudioPlayer.pause();
+    },
+    play() {
+      this.AudioPlayer.play();
+    },
+    chaAudio(num) {
+      let result = this.AudioPlayer.playIndex + num;
+      console.log(result);
+      if (result >= 0 && result < this.AudioPlayer.playList.length) {
+        this.AudioPlayer.setCurrentAudio(result);
+        this.AudioPlayer.play();
       }
     },
-    chaAudio(next) {
-      if (
-        this.AudioPlay.PlayIndex + next >= 0 &&
-        this.AudioPlay.PlayIndex + next < this.AudioPlay.PlayList.length
-      ) {
-        this.AudioPlay.pause();
-        this.AudioPlay.SetCurrentAudio(this.AudioPlay.PlayIndex + next);
-        this.AudioPlay.play();
-      }
+    showList() {
+      this.AudioPlayer.listShow = !this.AudioPlayer.listShow;
     },
   },
 };
@@ -113,12 +109,15 @@ export default {
 <style scoped>
 .wrapper {
   display: grid;
-  grid-template-columns: 30% 40% 30%;
-  height: 100%;
+  grid-template-columns: 1fr 1.5fr 1fr;
   align-items: center;
+  height: 100%;
 }
-.disable {
-  cursor: auto !important;
+.ui img {
+  cursor: pointer;
+}
+.disabled {
+  cursor: auto;
   opacity: 0.5;
 }
 </style>
