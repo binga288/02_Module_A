@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <div>
     <div class="d-flex ml-3 mt-4 align-items-center">
       <input
@@ -31,8 +32,11 @@
         class="text-white-50"
       >{{ song[0].album_title }}</div>
       <div class="text-white-50">{{ AudioPlayer.formatDate(song[0].duration) }}</div>
+=======
+    <div class="wrapper">
+        <input type="text" v-model="searchWord" class="form-control ml-3 mt-3 px-4 rounded-pill" style="width:20%;" placeholder="輸入關鍵字">
+>>>>>>> parent of 64212ad ([down]0820)
     </div>
-  </div>
 </template>
 <style scoped>
 .songlist {
@@ -51,6 +55,7 @@
 </style>
 <script>
 export default {
+<<<<<<< HEAD
   props: {
     albums: Array,
     AudioPlayer: Object,
@@ -135,4 +140,21 @@ export default {
     },
   },
 };
+=======
+    props:{
+        Albums:Array
+    },
+    data(){
+        return{
+            searchWord:""
+        }
+    },
+    watch:{
+        searchWord:function(str){
+            let normal = str.match(/(title|artist|composer|album):\w{3}/g);
+            console.log(normal)
+        }
+    }
+}
+>>>>>>> parent of 64212ad ([down]0820)
 </script>

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+<<<<<<< HEAD
     <div class="left">
       <Control :AudioPlayer="AudioPlayer" />
     </div>
@@ -8,16 +9,28 @@
     </div>
     <div class="right" v-if="AudioPlayer.listShow">
       <Playlist :AudioPlayer="AudioPlayer"/>
+=======
+    <div class="control">
+      <Control />
+    </div>
+    <div class="center">
+      <transition name="fade" mode="out-in">
+        <router-view :AudioPlay="AudioPlay" />
+      </transition>
+    </div>
+    <div class="right" v-if="AudioPlay.listShow">
+      <SongList :AudioPlay="AudioPlay" />
+>>>>>>> parent of 64212ad ([down]0820)
     </div>
     <div class="player">
       <Footer :AudioPlayer="AudioPlayer" />
     </div>
   </div>
 </template>
-
 <script>
 import Control from "@/components/control.vue";
 import Footer from "@/components/footer.vue";
+<<<<<<< HEAD
 import Playlist from "@/components/playlist.vue";
 import AudioPlayer from "@/audio.js";
 
@@ -34,6 +47,24 @@ export default {
     },
     playList: function () {
       return this.AudioPlayer.playList;
+=======
+import AudioPlay from "@/audio.js";
+import SongList from "@/components/PlayList.vue";
+export default {
+  components: {
+    Control,
+    Footer,
+    SongList,
+  },
+  data() {
+    return {
+      AudioPlay: new AudioPlay()
+    };
+  },
+  computed: {
+    PlayList: function () {
+      return this.AudioPlay.PlayList;
+>>>>>>> parent of 64212ad ([down]0820)
     },
     played: function () {
       return this.AudioPlayer.played;
@@ -43,6 +74,7 @@ export default {
     },
   },
   watch: {
+<<<<<<< HEAD
     playList: function () {
       localStorage.setItem("playList", JSON.stringify(this.playList));
     },
@@ -64,6 +96,13 @@ export default {
           },
         ],
       });
+=======
+    PlayList: function () {
+      localStorage.setItem("playlist", JSON.stringify(this.PlayList));
+>>>>>>> parent of 64212ad ([down]0820)
+    },
+    PlayIndex: function () {
+      localStorage.setItem("playindex", JSON.stringify(this.PlayIndex));
     },
   },
   components: {
@@ -113,11 +152,15 @@ export default {
   },
 };
 </script>
-
 <style>
 * {
+<<<<<<< HEAD
   text-decoration: none !important;
+=======
+  font-family: "微軟正黑體";
+>>>>>>> parent of 64212ad ([down]0820)
   user-select: none;
+  text-decoration: none !important;
 }
 body {
   margin: 0;
@@ -129,24 +172,52 @@ body {
   grid-template-columns: 20vw 45vw 35vw;
   grid-template-rows: 90vh 10vh;
   grid-template-areas:
-    "left center right"
+    "control center right"
     "player player player";
 }
+<<<<<<< HEAD
 .left {
+=======
+.control {
+  grid-area: control;
+>>>>>>> parent of 64212ad ([down]0820)
   background: black;
   grid-area: "left";
 }
 .center {
   background: #111;
+<<<<<<< HEAD
   grid-area: center;
-  grid-column-end: span 2;
+=======
   overflow-y: scroll;
+>>>>>>> parent of 64212ad ([down]0820)
+  grid-column-end: span 2;
 }
+.right {
+  grid-area: right;
+  background: rgba(0, 0, 0, 0.7);
+  overflow-y: scroll;
+  z-index: 3;
+}
+<<<<<<< HEAD
 .right {
   background: rgba(0, 0, 0, 0.5);
   grid-area: right;
   z-index: 99;
   overflow-y: scroll;
+=======
+.player {
+  grid-area: player;
+  background: #1d1d1d;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: 0.1s;
+>>>>>>> parent of 64212ad ([down]0820)
 }
 .player {
   background: #1d1d1d;
